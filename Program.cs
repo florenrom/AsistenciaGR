@@ -1,4 +1,9 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using AsistenciaGR.Data;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<AsistenciaGRContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AsistenciaGRContext") ?? throw new InvalidOperationException("Connection string 'AsistenciaGRContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
