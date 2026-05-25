@@ -15,10 +15,5 @@ namespace AsistenciaGR.Data
         }
 
         public DbSet<AsistenciaGR.Models.Asistencia> Asistencia { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Carreras> Carreras { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Carreras_Materias> Carreras_Materias { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Materias> Materias { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Roles> Roles { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Usuarios> Usuarios { get; set; } = default!;
     }
 }
