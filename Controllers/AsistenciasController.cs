@@ -19,11 +19,18 @@ namespace AsistenciaGR.Controllers
             _context = context;
         }
 
+
+
+
         // GET: Asistencias
         public async Task<IActionResult> Index()
         {
             return View(await _context.Asistencia.ToListAsync());
         }
+
+
+
+
 
         // GET: Asistencias/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -43,27 +50,73 @@ namespace AsistenciaGR.Controllers
             return View(asistencia);
         }
 
+
+
         // GET: Asistencias/Create
         public IActionResult Create()
         {
             return View();
         }
 
+
+
+
         // POST: Asistencias/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("AsId,AsFecha,AsPresente,AsJustificacion")] Asistencia asistencia)
         {
+            // -LÓGICA DE NEGOCIO: CREACIÓN -
+
+            //1: Automatización de fecha 
+            // Si el usuario no eligió fecha, el sistema pone la fecha actual automáticamente
+            if (asistencia.AsFecha == null)
+            {
+                asistencia.AsFecha = DateTime.Now;
+            }
+
+
+
+            // 2. Validación: Fecha no futura, No permitimos registros en fechas futuras
+            if (asistencia.AsFecha > DateTime.Now)
+            {
+                ModelState.AddModelError("AsFecha", "No puedes registrar fechas futuras.");
+            }
+
+            // 3. Lógica: Si marca 'Presente', la justificación debe ser false obligatoriamente.
+            if (asistencia.AsPresente)
+            {
+                asistencia.AsJustificacion = false;
+
+            } // 4. Aplicamos flexibilidad en ausencias: Si marca 'Ausente' (AsPresente = false), 
+              // el sistema permite al usuario decidir libremente si el estudiante justifica o no.
+
+
+            else
+            {
+                // No aplicamos restricciones adicionales, se respeta la decisión del usuario.
+            }
+
+
+
+
             if (ModelState.IsValid)
             {
                 _context.Add(asistencia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(asistencia);
         }
+
+
+
 
         // GET: Asistencias/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -81,9 +134,14 @@ namespace AsistenciaGR.Controllers
             return View(asistencia);
         }
 
+
+
+
         // POST: Asistencias/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("AsId,AsFecha,AsPresente,AsJustificacion")] Asistencia asistencia)
@@ -92,6 +150,26 @@ namespace AsistenciaGR.Controllers
             {
                 return NotFound();
             }
+
+            // -LÓGICA DE NEGOCIO: EDICIÓN -
+
+            // 1. Automatización: Si por error se borra la fecha, la restauramos al momento actual
+            if (asistencia.AsFecha == null) { asistencia.AsFecha = DateTime.Now; }
+
+
+            // 2. Validación: Mantenemos la regla de no permitir fechas futuras
+            if (asistencia.AsFecha > DateTime.Now)
+            {
+                ModelState.AddModelError("AsFecha", "No puedes registrar fechas futuras.");
+            }
+
+
+            // 3. Limpieza de datos: Si se marca 'Presente' durante la edición, limpiamos la justificación.
+            if (asistencia.AsPresente)
+            {
+                asistencia.AsJustificacion = false;
+            }
+
 
             if (ModelState.IsValid)
             {
@@ -115,6 +193,10 @@ namespace AsistenciaGR.Controllers
             }
             return View(asistencia);
         }
+
+
+
+        //(Delete y AsistenciaExists se mantienen iguales)
 
         // GET: Asistencias/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -155,3 +237,11 @@ namespace AsistenciaGR.Controllers
         }
     }
 }
+
+//"Este controlador gestiona la asistencia asegurando la integridad
+//de los datos mediante tres reglas principales:
+
+//-1.Automatización: Si la fecha viene vacía, se asigna DateTime.Now.
+//-2. Validación: Se bloquea el registro de fechas futuras para evitar errores de carga.
+//-3. Consistencia: Si se marca 'Presente', se limpia automáticamente
+//cualquier estado de justificación previo, evitando datos contradictorios en la base de datos."
