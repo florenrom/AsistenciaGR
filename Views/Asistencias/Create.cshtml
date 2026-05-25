@@ -1,43 +1,118 @@
-﻿@model AsistenciaGR.Models.Asistencia
+﻿@model IEnumerable<AsistenciaGR.Models.Asistencia>
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Asistencias";
 }
 
-<h1>Create</h1>
+<style>
+    .asistencias-container { max-width: 900px; margin: 30px auto; }
+    .app-header { text-align: center; font-weight: 700; letter-spacing: 6px; color:#0b2e7a; }
+    .info-box { background: #dff3ff; border-radius: 8px; padding: 16px 20px; margin: 18px auto; color:#fff; background-color:#cfeefc; display:flex; justify-content:space-between; align-items:center; }
+    .info-left { color:#063b66; font-size:13px; }
+    .info-right { color:#063b66; font-size:13px; text-align:right; }
+    .attendance-table { width:100%; border-collapse:collapse; margin: 20px auto; }
+    .attendance-table th, .attendance-table td { border:2px solid #0b2e7a; padding:12px 14px; }
+    .attendance-table th { background: #fff; font-weight:700; }
+    .modules-box { display:flex; gap:8px; justify-content:center; }
+    .module-checkbox { width:20px; height:20px; border-radius:4px; }
+    .guardar-wrap { text-align:center; margin-top:20px; }
+    .btn-guardar { background:#072a84; color:#fff; padding:12px 36px; border-radius:12px; border:none; }
+    @@media (max-width:768px){ .info-box{flex-direction:column; gap:8px; text-align:center;} }
+</style>
 
-<h4>Asistencia</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="AsFecha" class="control-label"></label>
-                <input asp-for="AsFecha" class="form-control" />
-                <span asp-validation-for="AsFecha" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="AsPresente" /> @Html.DisplayNameFor(model => model.AsPresente)
-                </label>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="AsJustificacion" /> @Html.DisplayNameFor(model => model.AsJustificacion)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="asistencias-container">
+    <div class="app-header">
+        <div style="font-size:18px">SISTEMA</div>
+        <div style="font-size:30px; color:#0b2e7a;">ASISTENCIAS</div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <!-- Info box (sin nombres) -->
+    <div class="info-box">
+        <div class="info-left">
+            <div>30/04/2026 12:32hs</div>
+            <div style="font-weight:600;">Tec. Sup. en Desarrollo de Software</div>
+        </div>
+        <div class="info-right">
+            <div style="font-weight:600;">Practicas Profesionalizantes III</div>
+            <div><!-- espacio para nombre (intencionalmente vacío) --></div>
+        </div>
+    </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    <!-- Tabla estática con diseño similar al mock -->
+    <table class="attendance-table">
+        <thead>
+            <tr>
+                <th style="width:45%">Apellido y Nombre</th>
+                <th style="width:35%; text-align:center">Modulos</th>
+                <th style="width:20%; text-align:center">Justificacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Albornoz Celina</td>
+                <td>
+                    <div class="modules-box">
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                    </div>
+                </td>
+                <td style="text-align:center"><input type="checkbox" /></td>
+            </tr>
+            <tr>
+                <td>Distasio Ignacio</td>
+                <td>
+                    <div class="modules-box">
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                    </div>
+                </td>
+                <td style="text-align:center"><input type="checkbox" /></td>
+            </tr>
+            <tr>
+                <td>Medina Roselen</td>
+                <td>
+                    <div class="modules-box">
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                    </div>
+                </td>
+                <td style="text-align:center"><input type="checkbox" /></td>
+            </tr>
+            <tr>
+                <td>Alarcon Nicolas</td>
+                <td>
+                    <div class="modules-box">
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                    </div>
+                </td>
+                <td style="text-align:center"><input type="checkbox" /></td>
+            </tr>
+            <tr>
+                <td>Terraza Nahuel</td>
+                <td>
+                    <div class="modules-box">
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                        <input type="checkbox" class="module-checkbox" />
+                    </div>
+                </td>
+                <td style="text-align:center"><input type="checkbox" /></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="guardar-wrap">
+        <button class="btn-guardar">Guardar</button>
+    </div>
+
+</div>
