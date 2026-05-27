@@ -1,0 +1,40 @@
+/* Styles for Asistencia view */
+.main-container-asistencia {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 0 16px;
+}
+
+.info-card {
+  background: #d8f0fb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 24px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.04);
+  margin-bottom: 24px;
+}
+.info-card .small { font-size: 12px; color: rgba(255,255,255,0.8); }
+.info-card .info-bold { font-weight: 600; color: #fff; }
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #12328a;
+}
+.attendance-table th, .attendance-table td {
+  border: 2px solid #12328a;
+  padding: 12px 16px;
+}
+.attendance-table thead th { background: #fff; font-weight: 700; }
+.modules-cell { text-align: center; }
+.custom-checkbox { width: 22px; height: 22px; margin: 0 6px; }
+.justification-cell { text-align: center; }
+
+.btn-wrap { text-align: center; margin-top: 24px; }
+.btn-guardar { background: #0a2b8a; color: #fff; padding: 12px 32px; border-radius: 18px; border: none; }
+
+@media (max-width: 600px) {
+  .attendance-table th, .attendance-table td { padding: 8px; }
+  .info-card { padding: 12px; }
+}

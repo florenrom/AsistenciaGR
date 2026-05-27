@@ -25,7 +25,24 @@ namespace AsistenciaGR.Controllers
         // GET: Asistencias
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Asistencia.ToListAsync());
+            var asistencias = _context.Asistencia
+                .Include(a => a.Usuario)
+                .Include(a => a.Materias);
+            return View(await asistencias.ToListAsync());
+        }
+
+        // GET: Asistencias/Asistencia
+        // Vista estática para toma de asistencia (diseño)
+        public IActionResult Asistencia()
+        {
+            return View();
+        }
+
+        // GET: Asistencias/AsistenciaGlobal
+        // Vista estática para asistencia global (diseño)
+        public IActionResult AsistenciaGlobal()
+        {
+            return View();
         }
 
 
