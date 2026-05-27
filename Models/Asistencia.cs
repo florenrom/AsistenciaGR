@@ -21,15 +21,15 @@ namespace AsistenciaGR.Models
         public bool AsJustificacion { get; set; } = false;
 
         // Clave foránea que conecta con el estudiante.
-        // public int? UsId { get; set; } // Por el momento no se utiliza
+        public int? UsId { get; set; } // Por el momento no se utiliza
 
         // Clave foránea que conecta con la a materia
-        //public int? MaId { get; set; }
+        public int? MaId { get; set; }
 
         // Conexión hacia el modelo Usuarios.
-        // public virtual Usuarios? Usuario { get; set; } // Por el momento no se utiliza
+        public virtual Usuarios? Usuario { get; set; } // Por el momento no se utiliza
 
         // Conexión hacia el modelo Materias.
-        // public virtual Materias? Materias { get; set; } // Por el momento no se utiliza
+        public virtual Materias? Materias { get; set; } // Por el momento no se utiliza
     }
 }

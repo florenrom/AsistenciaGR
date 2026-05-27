@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AsistenciaGR.Data;
 using AsistenciaGR.Models;
@@ -45,10 +46,13 @@ namespace AsistenciaGR.Controllers
         // GET: Usuarios/Create
         public IActionResult Create()
         {
+            ViewData["RoId"] = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Roles, "RoId", "RoDenominacion");
             return View();
         }
 
         // POST: Usuarios/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("UsId,UsApellido,UsNombre,UsDNI,RoId")] Usuarios usuarios)
@@ -59,6 +63,7 @@ namespace AsistenciaGR.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["RoId"] = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Roles, "RoId", "RoDenominacion", usuarios.RoId);
             return View(usuarios);
         }
 
@@ -79,6 +84,8 @@ namespace AsistenciaGR.Controllers
         }
 
         // POST: Usuarios/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("UsId,UsApellido,UsNombre,UsDNI,RoId")] Usuarios usuarios)

@@ -11,6 +11,6 @@ namespace AsistenciaGR.Models
         public string MaModalidad { get; set; }
         public int MaCantHoras { get; set; }
         public int CaId { get; set; }
-        public ICollection<Carreras_Materias> Carreras_Materias { get; set; }
+        public ICollection<Carreras_Materias>? Carreras_Materias { get; set; }
     }
 }

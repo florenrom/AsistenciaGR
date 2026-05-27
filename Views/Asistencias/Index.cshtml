@@ -21,6 +21,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.AsJustificacion)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UsId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaId)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -35,6 +41,12 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.AsJustificacion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UsId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaId)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.AsId">Edit</a> |
