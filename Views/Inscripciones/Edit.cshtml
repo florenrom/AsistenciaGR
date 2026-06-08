@@ -1,0 +1,49 @@
+@model AsistenciaGR.Models.Inscripciones
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Inscripciones</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="InId" />
+            <div class="form-group">
+                <label asp-for="UsId" class="control-label"></label>
+                <input asp-for="UsId" class="form-control" />
+                <span asp-validation-for="UsId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CaMaId" class="control-label"></label>
+                <input asp-for="CaMaId" class="form-control" />
+                <span asp-validation-for="CaMaId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Usuarios" class="control-label"></label>
+                <input asp-for="Usuarios" class="form-control" />
+                <span asp-validation-for="Usuarios" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Carreras_Materias" class="control-label"></label>
+                <input asp-for="Carreras_Materias" class="form-control" />
+                <span asp-validation-for="Carreras_Materias" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

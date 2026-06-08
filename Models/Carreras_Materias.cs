@@ -10,5 +10,6 @@ namespace AsistenciaGR.Models
         public virtual Carreras? Carreras { get; set; }
         public int MaId { get; set; }
         public virtual Materias? Materias { get; set; }
+        public virtual Inscripciones? Inscripciones { get; set; }
     }
 }

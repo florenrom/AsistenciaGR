@@ -9,6 +9,7 @@ namespace AsistenciaGR.Data
 {
     public class AsistenciaGRContext : DbContext
     {
+        public DbSet<AsistenciaGR.Models.Inscripciones> Inscripciones { get; set; } = default!;
         public AsistenciaGRContext (DbContextOptions<AsistenciaGRContext> options)
             : base(options)
         {
