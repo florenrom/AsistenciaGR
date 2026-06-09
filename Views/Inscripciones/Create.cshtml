@@ -10,32 +10,25 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
             <div class="form-group">
                 <label asp-for="UsId" class="control-label"></label>
-                <input asp-for="UsId" class="form-control" />
+                <select asp-for="UsId" class="form-control" asp-items="@(ViewData["UsId"] as SelectList)">
+                    <option value="">-- Seleccione un estudiante --</option>
+                </select>
                 <span asp-validation-for="UsId" class="text-danger"></span>
             </div>
-
             <div class="form-group">
                 <label asp-for="CaMaId" class="control-label"></label>
-                <input asp-for="CaMaId" class="form-control" />
+                <select asp-for="CaMaId" class="form-control" asp-items="@(ViewData["CaMaId"] as SelectList)">
+                    <option value="">-- Seleccione una carrera/materia --</option>
+                </select>
                 <span asp-validation-for="CaMaId" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="Usuarios" class="control-label"></label>
-                <input asp-for="Usuarios" class="form-control" />
-                <span asp-validation-for="Usuarios" class="text-danger"></span>
-            </div>
 
-            <div class="form-group">
-                <label asp-for="Carreras_Materias" class="control-label"></label>
-                <input asp-for="Carreras_Materias" class="form-control" />
-                <span asp-validation-for="Carreras_Materias" class="text-danger"></span>
-            </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

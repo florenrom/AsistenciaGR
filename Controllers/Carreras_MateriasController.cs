@@ -1,152 +1,157 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AsistenciaGR.Data;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using AsistenciaGR.Models;
+using AsistenciaGR.Data;
 
-namespace AsistenciaGR.Controllers
+public class Carreras_MateriasController : Controller
 {
-    public class Carreras_MateriasController : Controller
+    private readonly AsistenciaGRContext _context;
+
+    public Carreras_MateriasController(AsistenciaGRContext context)
     {
-        private readonly AsistenciaGRContext _context;
+        _context = context;
+    }
 
-        public Carreras_MateriasController(AsistenciaGRContext context)
+    // GET: CARRERAS_MATERIASS
+    public async Task<IActionResult> Index()    
+    {
+        return View(await _context.Carreras_Materias.ToListAsync());
+    }
+
+    // GET: CARRERAS_MATERIASS/Details/5
+    public async Task<IActionResult> Details(int? camaid)
+    {
+        if (camaid == null)
         {
-            _context = context;
+            return NotFound();
         }
 
-        // GET: Carreras_Materias
-        public async Task<IActionResult> Index()
+        var carreras_materias = await _context.Carreras_Materias
+            .FirstOrDefaultAsync(m => m.CaMaId == camaid);
+        if (carreras_materias == null)
         {
-            return View(await _context.Carreras_Materias.ToListAsync());
+            return NotFound();
         }
 
-        // GET: Carreras_Materias/Details/5
-        public async Task<IActionResult> Details(int? id)
+        return View(carreras_materias);
+    }
+
+    // GET: CARRERAS_MATERIASS/Create
+    public IActionResult Create()
+    {
+        ViewData["CaId"] = new SelectList(_context.Carreras, "CaId", "CaDenominacion");
+        ViewData["MaId"] = new SelectList(_context.Materias, "MaId", "MaDenominacion");
+        return View();
+    }
+
+    // POST: CARRERAS_MATERIASS/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("CaMaId,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
+    {
+        if (ModelState.IsValid)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var carreras_Materias = await _context.Carreras_Materias
-                .FirstOrDefaultAsync(m => m.CaMaId == id);
-            if (carreras_Materias == null)
-            {
-                return NotFound();
-            }
-
-            return View(carreras_Materias);
-        }
-
-        // GET: Carreras_Materias/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Carreras_Materias/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CaMaId,CaId,MaId")] Carreras_Materias carreras_Materias)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(carreras_Materias);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(carreras_Materias);
-        }
-
-        // GET: Carreras_Materias/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var carreras_Materias = await _context.Carreras_Materias.FindAsync(id);
-            if (carreras_Materias == null)
-            {
-                return NotFound();
-            }
-            return View(carreras_Materias);
-        }
-
-        // POST: Carreras_Materias/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CaMaId,CaId,MaId")] Carreras_Materias carreras_Materias)
-        {
-            if (id != carreras_Materias.CaMaId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(carreras_Materias);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!Carreras_MateriasExists(carreras_Materias.CaMaId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(carreras_Materias);
-        }
-
-        // GET: Carreras_Materias/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var carreras_Materias = await _context.Carreras_Materias
-                .FirstOrDefaultAsync(m => m.CaMaId == id);
-            if (carreras_Materias == null)
-            {
-                return NotFound();
-            }
-
-            return View(carreras_Materias);
-        }
-
-        // POST: Carreras_Materias/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var carreras_Materias = await _context.Carreras_Materias.FindAsync(id);
-            if (carreras_Materias != null)
-            {
-                _context.Carreras_Materias.Remove(carreras_Materias);
-            }
-
+            _context.Add(carreras_materias);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool Carreras_MateriasExists(int id)
+        // repopulate selects on error
+        ViewData["CaId"] = new SelectList(_context.Carreras, "CaId", "CaDenominacion", carreras_materias.CaId);
+        ViewData["MaId"] = new SelectList(_context.Materias, "MaId", "MaDenominacion", carreras_materias.MaId);
+        return View(carreras_materias);
+    }
+
+    // GET: CARRERAS_MATERIASS/Edit/5
+    public async Task<IActionResult> Edit(int? camaid)
+    {
+        if (camaid == null)
         {
-            return _context.Carreras_Materias.Any(e => e.CaMaId == id);
+            return NotFound();
         }
+
+        var carreras_materias = await _context.Carreras_Materias.FindAsync(camaid);
+        if (carreras_materias == null)
+        {
+            return NotFound();
+        }
+        return View(carreras_materias);
+    }
+
+    // POST: CARRERAS_MATERIASS/Edit/5
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int? camaid, [Bind("CaMaId,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
+    {
+        if (camaid != carreras_materias.CaMaId)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                _context.Update(carreras_materias);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!Carreras_MateriasExists(carreras_materias.CaMaId))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        return View(carreras_materias);
+    }
+
+    // GET: CARRERAS_MATERIASS/Delete/5
+    public async Task<IActionResult> Delete(int? camaid)
+    {
+        if (camaid == null)
+        {
+            return NotFound();
+        }
+
+        var carreras_materias = await _context.Carreras_Materias
+            .FirstOrDefaultAsync(m => m.CaMaId == camaid);
+        if (carreras_materias == null)
+        {
+            return NotFound();
+        }
+
+        return View(carreras_materias);
+    }
+
+    // POST: CARRERAS_MATERIASS/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int? camaid)
+    {
+        var carreras_materias = await _context.Carreras_Materias.FindAsync(camaid);
+        if (carreras_materias != null)
+        {
+            _context.Carreras_Materias.Remove(carreras_materias);
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    private bool Carreras_MateriasExists(int? camaid)
+    {
+        return _context.Carreras_Materias.Any(e => e.CaMaId == camaid);
     }
 }

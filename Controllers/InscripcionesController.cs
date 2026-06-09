@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using AsistenciaGR.Models;
 using AsistenciaGR.Data;
 
@@ -38,8 +39,35 @@ public class InscripcionesController : Controller
     }
 
     // GET: INSCRIPCIONESS/Create
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        // find role id for 'Estudiante' (case-insensitive)
+        var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoDenominacion.ToLower() == "estudiante");
+
+        List<object> students;
+        if (role != null)
+        {
+            students = await _context.Usuarios
+                .Where(u => u.RoId == role.RoId)
+                .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
+                .Cast<object>()
+                .ToListAsync();
+        }
+        else
+        {
+            // no role named 'Estudiante' found -> empty list
+            students = new List<object>();
+        }
+
+        ViewData["UsId"] = new SelectList(students, "UsId", "FullName");
+
+        // populate Carreras_Materias (IDs only)
+        var cam = await _context.Carreras_Materias
+            .Select(cm => new { cm.CaMaId })
+            .ToListAsync();
+        // use the CaMaId as both value and text so the select shows the IDs
+        ViewData["CaMaId"] = new SelectList(cam.Select(x => new { CaMaId = x.CaMaId, Display = x.CaMaId.ToString() }), "CaMaId", "Display");
+
         return View();
     }
 
@@ -48,7 +76,7 @@ public class InscripcionesController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("InId,UsId,CaMaId,Usuarios,Carreras_Materias")] Inscripciones inscripciones)
+    public async Task<IActionResult> Create([Bind("InId,UsId,CaMaId")] Inscripciones inscripciones)
     {
         if (ModelState.IsValid)
         {
@@ -56,6 +84,20 @@ public class InscripcionesController : Controller
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        // repopulate selects when returning view on error
+        var students = await _context.Usuarios
+            .Include(u => u.Roles)
+            .Where(u => u.Roles != null && u.Roles.RoDenominacion == "Estudiante")
+            .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
+            .ToListAsync();
+        ViewData["UsId"] = new SelectList(students, "UsId", "FullName", inscripciones.UsId);
+
+        var cam = await _context.Carreras_Materias
+            .Select(cm => new { cm.CaMaId })
+            .ToListAsync();
+        ViewData["CaMaId"] = new SelectList(cam.Select(x => new { CaMaId = x.CaMaId, Display = x.CaMaId.ToString() }), "CaMaId", "Display", inscripciones.CaMaId);
+
         return View(inscripciones);
     }
 
