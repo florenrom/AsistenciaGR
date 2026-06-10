@@ -11,6 +11,7 @@ namespace AsistenciaGR.Models
         public int UsDNI { get; set; }
         public int RoId { get; set; }
         public virtual Roles? Roles { get; set; }
-        public virtual Inscripciones? Inscripciones { get; set; }
+        // navigation: a user can have multiple inscripciones
+        public virtual ICollection<Inscripciones> Inscripciones { get; set; } = new List<Inscripciones>();
     }
 }

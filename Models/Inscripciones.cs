@@ -8,7 +8,9 @@ namespace AsistenciaGR.Models
         public int InId { get; set; }
         public int UsId { get; set; }
         public int CaMaId { get; set; }
-        public virtual ICollection<Usuarios> Usuarios { get; set; } = new List<Usuarios>();
-        public virtual ICollection<Carreras_Materias> Carreras_Materias { get; set; } = new List<Carreras_Materias>();
+        // Navigation to single Usuario (estudiante) for this inscripción
+        public virtual Usuarios? Usuarios { get; set; }
+        // Navigation to single Carreras_Materias for this inscripción
+        public virtual Carreras_Materias? Carreras_Materias { get; set; }
     }
 }

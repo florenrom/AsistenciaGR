@@ -6,10 +6,12 @@ namespace AsistenciaGR.Models
     {
         [Key]
         public int CaMaId { get; set; }
+        public string CaMaDenominacion { get; set; }
         public int CaId { get; set; }
         public virtual Carreras? Carreras { get; set; }
         public int MaId { get; set; }
         public virtual Materias? Materias { get; set; }
-        public virtual Inscripciones? Inscripciones { get; set; }
+        // navigation: multiple inscripciones can reference this Carreras_Materias
+        public virtual ICollection<Inscripciones> Inscripciones { get; set; } = new List<Inscripciones>();
     }
 }

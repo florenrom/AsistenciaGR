@@ -51,7 +51,7 @@ public class Carreras_MateriasController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("CaMaId,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
+    public async Task<IActionResult> Create([Bind("CaMaId,CaMaDenominacion,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
     {
         if (ModelState.IsValid)
         {
@@ -59,7 +59,6 @@ public class Carreras_MateriasController : Controller
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
         // repopulate selects on error
         ViewData["CaId"] = new SelectList(_context.Carreras, "CaId", "CaDenominacion", carreras_materias.CaId);
         ViewData["MaId"] = new SelectList(_context.Materias, "MaId", "MaDenominacion", carreras_materias.MaId);
@@ -87,7 +86,7 @@ public class Carreras_MateriasController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? camaid, [Bind("CaMaId,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
+    public async Task<IActionResult> Edit(int? camaid, [Bind("CaMaId,CaMaDenominacion,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
     {
         if (camaid != carreras_materias.CaMaId)
         {

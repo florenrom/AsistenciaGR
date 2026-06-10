@@ -61,12 +61,11 @@ public class InscripcionesController : Controller
 
         ViewData["UsId"] = new SelectList(students, "UsId", "FullName");
 
-        // populate Carreras_Materias (IDs only)
+        // populate Carreras_Materias using CaMaDenominacion as the display text
         var cam = await _context.Carreras_Materias
-            .Select(cm => new { cm.CaMaId })
+            .Select(cm => new { cm.CaMaId, cm.CaMaDenominacion })
             .ToListAsync();
-        // use the CaMaId as both value and text so the select shows the IDs
-        ViewData["CaMaId"] = new SelectList(cam.Select(x => new { CaMaId = x.CaMaId, Display = x.CaMaId.ToString() }), "CaMaId", "Display");
+        ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "CaMaDenominacion");
 
         return View();
     }
@@ -94,9 +93,9 @@ public class InscripcionesController : Controller
         ViewData["UsId"] = new SelectList(students, "UsId", "FullName", inscripciones.UsId);
 
         var cam = await _context.Carreras_Materias
-            .Select(cm => new { cm.CaMaId })
+            .Select(cm => new { cm.CaMaId, cm.CaMaDenominacion })
             .ToListAsync();
-        ViewData["CaMaId"] = new SelectList(cam.Select(x => new { CaMaId = x.CaMaId, Display = x.CaMaId.ToString() }), "CaMaId", "Display", inscripciones.CaMaId);
+        ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "CaMaDenominacion", inscripciones.CaMaId);
 
         return View(inscripciones);
     }
@@ -114,6 +113,19 @@ public class InscripcionesController : Controller
         {
             return NotFound();
         }
+        // populate selects for edit view
+        var students = await _context.Usuarios
+            .Include(u => u.Roles)
+            .Where(u => u.Roles != null && u.Roles.RoDenominacion == "Estudiante")
+            .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
+            .ToListAsync();
+        ViewData["UsId"] = new SelectList(students, "UsId", "FullName", inscripciones.UsId);
+
+        var cam = await _context.Carreras_Materias
+            .Select(cm => new { cm.CaMaId, cm.CaMaDenominacion })
+            .ToListAsync();
+        ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "CaMaDenominacion", inscripciones.CaMaId);
+
         return View(inscripciones);
     }
 
@@ -149,6 +161,19 @@ public class InscripcionesController : Controller
             }
             return RedirectToAction(nameof(Index));
         }
+        // repopulate selects when returning view on error
+        var students = await _context.Usuarios
+            .Include(u => u.Roles)
+            .Where(u => u.Roles != null && u.Roles.RoDenominacion == "Estudiante")
+            .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
+            .ToListAsync();
+        ViewData["UsId"] = new SelectList(students, "UsId", "FullName", inscripciones.UsId);
+
+        var cam = await _context.Carreras_Materias
+            .Select(cm => new { cm.CaMaId, cm.CaMaDenominacion })
+            .ToListAsync();
+        ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "CaMaDenominacion", inscripciones.CaMaId);
+
         return View(inscripciones);
     }
 

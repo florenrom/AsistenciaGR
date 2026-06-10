@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AsistenciaGR.Migrations
 {
     [DbContext(typeof(AsistenciaGRContext))]
-    [Migration("20260609000841_asgr")]
+    [Migration("20260610042854_asgr")]
     partial class asgr
     {
         /// <inheritdoc />
@@ -90,6 +90,10 @@ namespace AsistenciaGR.Migrations
 
                     b.Property<int>("CaId")
                         .HasColumnType("int");
+
+                    b.Property<string>("CaMaDenominacion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("CarrerasCaId")
                         .HasColumnType("int");

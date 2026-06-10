@@ -28,14 +28,87 @@ namespace AsistenciaGR.Controllers
             var asistencias = _context.Asistencia
                 .Include(a => a.Usuario)
                 .Include(a => a.Materias);
+            // populate Carreras_Materias select list (CaMaDenominacion)
+            var cam = await _context.Carreras_Materias
+                .Select(cm => new { cm.CaMaId, cm.CaMaDenominacion })
+                .ToListAsync();
+            ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "CaMaDenominacion");
+
             return View(await asistencias.ToListAsync());
         }
 
         // GET: Asistencias/Asistencia
         // Vista estática para toma de asistencia (diseño)
-        public IActionResult Asistencia()
+        public async Task<IActionResult> Asistencia(int? CaMaId)
         {
-            return View();
+            var model = new AsistenciaFormViewModel();
+            if (CaMaId == null)
+            {
+                return View(model);
+            }
+
+            model.CaMaId = CaMaId;
+
+            // find role 'Estudiante'
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoDenominacion == "Estudiante");
+            if (role == null)
+            {
+                return View(model);
+            }
+
+            // find users inscribed to this Carreras_Materias via Inscripciones
+            var students = await _context.Inscripciones
+                .Where(i => i.CaMaId == CaMaId)
+                .Select(i => i.Usuarios)
+                .Where(u => u != null && u.RoId == role.RoId)
+                .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
+                .ToListAsync();
+
+            foreach (var s in students)
+            {
+                model.Rows.Add(new AsistenciaRowViewModel { UsId = s.UsId, FullName = s.FullName });
+            }
+
+            // get CaMaDenominacion for display
+            var caMaName = await _context.Carreras_Materias
+                .Where(cm => cm.CaMaId == CaMaId)
+                .Select(cm => cm.CaMaDenominacion)
+                .FirstOrDefaultAsync();
+            ViewData["CaMaDenominacion"] = caMaName;
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Asistencia(AsistenciaFormViewModel model)
+        {
+            if (model.CaMaId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Debe seleccionar una carrera/materia.");
+                return View(model);
+            }
+
+            // iterate rows and save attendance records
+            foreach (var row in model.Rows)
+            {
+                // determine presence from modules: present if any module checked
+                var presente = row.Modulos != null && row.Modulos.Any(x => x);
+
+                var entity = new Asistencia
+                {
+                    AsFecha = DateTime.Now,
+                    AsPresente = presente,
+                    AsJustificacion = row.AsJustificacion,
+                    UsId = row.UsId,
+                    CaMaId = model.CaMaId
+                };
+
+                _context.Asistencia.Add(entity);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Asistencias/AsistenciaGlobal

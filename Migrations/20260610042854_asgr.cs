@@ -73,6 +73,7 @@ namespace AsistenciaGR.Migrations
                 {
                     CaMaId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CaMaDenominacion = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CaId = table.Column<int>(type: "int", nullable: false),
                     CarrerasCaId = table.Column<int>(type: "int", nullable: true),
                     MaId = table.Column<int>(type: "int", nullable: false),
