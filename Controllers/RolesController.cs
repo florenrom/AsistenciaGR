@@ -54,7 +54,7 @@ namespace AsistenciaGR.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RoId,RoDenominacion")] Roles roles)
+        public async Task<IActionResult> Create([Bind("RoId,RoDenominacion")] Rol roles)
         {
             if (ModelState.IsValid)
             {
@@ -86,7 +86,7 @@ namespace AsistenciaGR.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("RoId,RoDenominacion")] Roles roles)
+        public async Task<IActionResult> Edit(int id, [Bind("RoId,RoDenominacion")] Rol roles)
         {
             if (id != roles.RoId)
             {

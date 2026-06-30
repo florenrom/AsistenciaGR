@@ -1,4 +1,4 @@
-@model AsistenciaGR.Models.Carreras_Materias
+@model AsistenciaGR.Models.CarreraMateria
 
 @{
     ViewData["Title"] = "Create";
@@ -23,9 +23,9 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="Carreras" class="control-label"></label>
-                <input asp-for="Carreras" class="form-control" />
-                <span asp-validation-for="Carreras" class="text-danger"></span>
+                <label asp-for="Carrera" class="control-label"></label>
+                <input asp-for="Carrera" class="form-control" />
+                <span asp-validation-for="Carrera" class="text-danger"></span>
             </div>
 
             <div class="form-group">
@@ -37,22 +37,16 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="Materias" class="control-label"></label>
-                <input asp-for="Materias" class="form-control" />
-                <span asp-validation-for="Materias" class="text-danger"></span>
+                <label asp-for="Materia" class="control-label"></label>
+                <input asp-for="Materia" class="form-control" />
+                <span asp-validation-for="Materia" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
-                <label asp-for="CaMaDenominacion" class="control-label"></label>
-                <input asp-for="CaMaDenominacion" class="form-control" />
-                <span asp-validation-for="CaMaDenominacion" class="text-danger"></span>
-            </div>
-
+@* 
             <div class="form-group">
                 <label asp-for="Inscripciones" class="control-label"></label>
                 <input asp-for="Inscripciones" class="form-control" />
                 <span asp-validation-for="Inscripciones" class="text-danger"></span>
-            </div>
+            </div> *@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

@@ -9,8 +9,8 @@ namespace AsistenciaGR.Models
         public int UsId { get; set; }
         public int CaMaId { get; set; }
         // Navigation to single Usuario (estudiante) for this inscripción
-        public virtual Usuarios? Usuarios { get; set; }
+        public virtual Usuario? Usuarios { get; set; }
         // Navigation to single Carreras_Materias for this inscripción
-        public virtual Carreras_Materias? Carreras_Materias { get; set; }
+        public virtual CarreraMateria? Carreras_Materias { get; set; }
     }
 }

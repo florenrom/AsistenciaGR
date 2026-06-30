@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AsistenciaGR.Models.Materias>
+﻿@model IEnumerable<AsistenciaGR.Models.Materia>
 
 @{
     ViewData["Title"] = "Index";
@@ -19,7 +19,7 @@
                 @Html.DisplayNameFor(model => model.MaModalidad)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MaCantHoras)
+                @Html.DisplayNameFor(model => model.MaCantModulos)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.CaId)
@@ -37,7 +37,7 @@
                 @Html.DisplayFor(modelItem => item.MaModalidad)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MaCantHoras)
+                @Html.DisplayFor(modelItem => item.MaCantModulos)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CaId)

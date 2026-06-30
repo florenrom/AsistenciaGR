@@ -15,30 +15,30 @@ namespace AsistenciaGR.Data
         {
         }
 
-        public DbSet<AsistenciaGR.Models.Asistencia> Asistencia { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Carreras> Carreras { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Carreras_Materias> Carreras_Materias { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Materias> Materias { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Roles> Roles { get; set; } = default!;
-        public DbSet<AsistenciaGR.Models.Usuarios> Usuarios { get; set; } = default!;
+        public DbSet<AsistenciaGR.Models.Asistencia> Asistencias { get; set; } = default!;
+        public DbSet<AsistenciaGR.Models.Carrera> Carreras { get; set; } = default!;
+        public DbSet<AsistenciaGR.Models.CarreraMateria> CarrerasMaterias { get; set; } = default!;
+        public DbSet<AsistenciaGR.Models.Materia> Materias { get; set; } = default!;
+        public DbSet<AsistenciaGR.Models.Rol> Roles { get; set; } = default!;
+        public DbSet<AsistenciaGR.Models.Usuario> Usuarios { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Inscripciones -> Usuarios (many Inscripciones per Usuario)
-            modelBuilder.Entity<Inscripciones>()
-                .HasOne(i => i.Usuarios)
-                .WithMany(u => u.Inscripciones)
-                .HasForeignKey(i => i.UsId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<Inscripciones>()
+            //    .HasOne(i => i.Usuarios)
+            //    .WithMany(u => u.Inscripciones)
+            //    .HasForeignKey(i => i.UsId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            // Inscripciones -> Carreras_Materias (many Inscripciones per Carreras_Materias)
-            modelBuilder.Entity<Inscripciones>()
-                .HasOne(i => i.Carreras_Materias)
-                .WithMany(cm => cm.Inscripciones)
-                .HasForeignKey(i => i.CaMaId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //// Inscripciones -> Carreras_Materias (many Inscripciones per Carreras_Materias)
+            //modelBuilder.Entity<Inscripciones>()
+            //    .HasOne(i => i.Carreras_Materias)
+            //    .WithMany(cm => cm.Inscripciones)
+            //    .HasForeignKey(i => i.CaMaId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
             // Asistencia optional relationships
             modelBuilder.Entity<Asistencia>()

@@ -17,7 +17,7 @@ public class Carreras_MateriasController : Controller
     // GET: CARRERAS_MATERIASS
     public async Task<IActionResult> Index()    
     {
-        return View(await _context.Carreras_Materias.ToListAsync());
+        return View(await _context.CarrerasMaterias.ToListAsync());
     }
 
     // GET: CARRERAS_MATERIASS/Details/5
@@ -28,7 +28,7 @@ public class Carreras_MateriasController : Controller
             return NotFound();
         }
 
-        var carreras_materias = await _context.Carreras_Materias
+        var carreras_materias = await _context.CarrerasMaterias
             .FirstOrDefaultAsync(m => m.CaMaId == camaid);
         if (carreras_materias == null)
         {
@@ -51,7 +51,7 @@ public class Carreras_MateriasController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("CaMaId,CaMaDenominacion,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
+    public async Task<IActionResult> Create([Bind("CaMaId,CaMaDenominacion,CaId,Carreras,MaId,Materias,Inscripciones")] CarreraMateria carreras_materias)
     {
         if (ModelState.IsValid)
         {
@@ -73,7 +73,7 @@ public class Carreras_MateriasController : Controller
             return NotFound();
         }
 
-        var carreras_materias = await _context.Carreras_Materias.FindAsync(camaid);
+        var carreras_materias = await _context.CarrerasMaterias.FindAsync(camaid);
         if (carreras_materias == null)
         {
             return NotFound();
@@ -86,7 +86,7 @@ public class Carreras_MateriasController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? camaid, [Bind("CaMaId,CaMaDenominacion,CaId,Carreras,MaId,Materias,Inscripciones")] Carreras_Materias carreras_materias)
+    public async Task<IActionResult> Edit(int? camaid, [Bind("CaMaId,CaMaDenominacion,CaId,Carreras,MaId,Materias,Inscripciones")] CarreraMateria carreras_materias)
     {
         if (camaid != carreras_materias.CaMaId)
         {
@@ -124,7 +124,7 @@ public class Carreras_MateriasController : Controller
             return NotFound();
         }
 
-        var carreras_materias = await _context.Carreras_Materias
+        var carreras_materias = await _context.CarrerasMaterias
             .FirstOrDefaultAsync(m => m.CaMaId == camaid);
         if (carreras_materias == null)
         {
@@ -139,10 +139,10 @@ public class Carreras_MateriasController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int? camaid)
     {
-        var carreras_materias = await _context.Carreras_Materias.FindAsync(camaid);
+        var carreras_materias = await _context.CarrerasMaterias.FindAsync(camaid);
         if (carreras_materias != null)
         {
-            _context.Carreras_Materias.Remove(carreras_materias);
+            _context.CarrerasMaterias.Remove(carreras_materias);
         }
 
         await _context.SaveChangesAsync();
@@ -151,6 +151,6 @@ public class Carreras_MateriasController : Controller
 
     private bool Carreras_MateriasExists(int? camaid)
     {
-        return _context.Carreras_Materias.Any(e => e.CaMaId == camaid);
+        return _context.CarrerasMaterias.Any(e => e.CaMaId == camaid);
     }
 }

@@ -34,12 +34,12 @@ namespace AsistenciaGR.Models
         public int? CaMaId { get; set; }
 
         // Conexión hacia el modelo Usuarios.
-        public virtual Usuarios? Usuario { get; set; } // Por el momento no se utiliza
+        public virtual Usuario? Usuario { get; set; } // Por el momento no se utiliza
 
         // Conexión hacia el modelo Materias.
-        public virtual Materias? Materias { get; set; } // Por el momento no se utiliza
+        public virtual Materia? Materias { get; set; } // Por el momento no se utiliza
 
         // Relación opcional hacia Carreras_Materias cuando la asistencia se vincula a una carrera/materia
-        public virtual Carreras_Materias? CarreraMateria { get; set; }
+        public virtual CarreraMateria? CarreraMateria { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-@model AsistenciaGR.Models.Carreras_Materias
+@model AsistenciaGR.Models.CarreraMateria
 
 @{
     ViewData["Title"] = "Details";
@@ -17,19 +17,11 @@
             @Html.DisplayFor(model => model.CaId)
         </dd>
     </dl>
-    <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CaMaDenominacion)
+            @Html.DisplayNameFor(model => model.Carrera)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CaMaDenominacion)
-        </dd>
-    </dl>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Carreras)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Carreras)
+            @Html.DisplayFor(model => model.Carrera)
         </dd>
     </dl>
         <dt class = "col-sm-2">
@@ -40,19 +32,19 @@
         </dd>
     </dl>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Materias)
+            @Html.DisplayNameFor(model => model.Materia)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Materias)
+            @Html.DisplayFor(model => model.Materia)
         </dd>
-    </dl>
+@*     </dl>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Inscripciones)
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Inscripciones)
         </dd>
-    </dl>
+    </dl> *@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.CaMaId">Edit</a> |

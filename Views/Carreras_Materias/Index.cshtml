@@ -1,4 +1,4 @@
-@model IEnumerable<AsistenciaGR.Models.Carreras_Materias>
+@model IEnumerable<AsistenciaGR.Models.CarreraMateria>
 
 @{
     ViewData["Title"] = "Index";
@@ -12,24 +12,22 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.CaMaDenominacion)
-            </th>
+
             <th>
                 @Html.DisplayNameFor(model => model.CaId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Carreras)
+                @Html.DisplayNameFor(model => model.Carrera)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.MaId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Materias)
+                @Html.DisplayNameFor(model => model.Materia)
             </th>
-            <th>
+@*             <th>
                 @Html.DisplayNameFor(model => model.Inscripciones)
-            </th>
+            </th> *@
             <th></th>
         </tr>
     </thead>
@@ -37,23 +35,20 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(model => item.CaMaDenominacion)
-            </td>
-            <td>
                 @Html.DisplayFor(model => item.CaId)
             </td>
             <td>
-                @Html.DisplayFor(model => item.Carreras)
+                @Html.DisplayFor(model => item.Carrera)
             </td>
             <td>
                 @Html.DisplayFor(model => item.MaId)
             </td>
             <td>
-                @Html.DisplayFor(model => item.Materias)
+                @Html.DisplayFor(model => item.Materia)
             </td>
-            <td>
+@*             <td>
                 @Html.DisplayFor(model => item.Inscripciones)
-            </td>
+            </td> *@
             <td>
                 <a asp-action="Edit" asp-route-id="@item.CaMaId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.CaMaId">Details</a> |

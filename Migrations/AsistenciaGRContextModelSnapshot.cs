@@ -59,10 +59,10 @@ namespace AsistenciaGR.Migrations
 
                     b.HasIndex("UsId");
 
-                    b.ToTable("Asistencia");
+                    b.ToTable("Asistencias");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Carreras", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Carrera", b =>
                 {
                     b.Property<int>("CaId")
                         .ValueGeneratedOnAdd()
@@ -79,7 +79,7 @@ namespace AsistenciaGR.Migrations
                     b.ToTable("Carreras");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Carreras_Materias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.CarrerasMaterias", b =>
                 {
                     b.Property<int>("CaMaId")
                         .ValueGeneratedOnAdd()
@@ -109,7 +109,7 @@ namespace AsistenciaGR.Migrations
 
                     b.HasIndex("MateriasMaId");
 
-                    b.ToTable("Carreras_Materias");
+                    b.ToTable("CarrerasMaterias");
                 });
 
             modelBuilder.Entity("AsistenciaGR.Models.Inscripciones", b =>
@@ -135,7 +135,7 @@ namespace AsistenciaGR.Migrations
                     b.ToTable("Inscripciones");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Materias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Materia", b =>
                 {
                     b.Property<int>("MaId")
                         .ValueGeneratedOnAdd()
@@ -162,7 +162,7 @@ namespace AsistenciaGR.Migrations
                     b.ToTable("Materias");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Roles", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Rol", b =>
                 {
                     b.Property<int>("RoId")
                         .ValueGeneratedOnAdd()
@@ -179,7 +179,7 @@ namespace AsistenciaGR.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Usuarios", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Usuario", b =>
                 {
                     b.Property<int>("UsId")
                         .ValueGeneratedOnAdd()
@@ -211,16 +211,16 @@ namespace AsistenciaGR.Migrations
 
             modelBuilder.Entity("AsistenciaGR.Models.Asistencia", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.Carreras_Materias", "CarreraMateria")
+                    b.HasOne("AsistenciaGR.Models.CarrerasMaterias", "CarreraMateria")
                         .WithMany()
                         .HasForeignKey("CaMaId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("AsistenciaGR.Models.Materias", "Materias")
+                    b.HasOne("AsistenciaGR.Models.Materia", "Materias")
                         .WithMany()
                         .HasForeignKey("MateriasMaId");
 
-                    b.HasOne("AsistenciaGR.Models.Usuarios", "Usuario")
+                    b.HasOne("AsistenciaGR.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsId")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -232,13 +232,13 @@ namespace AsistenciaGR.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Carreras_Materias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.CarrerasMaterias", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.Carreras", "Carreras")
+                    b.HasOne("AsistenciaGR.Models.Carrera", "Carreras")
                         .WithMany("Carreras_Materias")
                         .HasForeignKey("CarrerasCaId");
 
-                    b.HasOne("AsistenciaGR.Models.Materias", "Materias")
+                    b.HasOne("AsistenciaGR.Models.Materia", "Materias")
                         .WithMany("Carreras_Materias")
                         .HasForeignKey("MateriasMaId");
 
@@ -249,13 +249,13 @@ namespace AsistenciaGR.Migrations
 
             modelBuilder.Entity("AsistenciaGR.Models.Inscripciones", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.Carreras_Materias", "Carreras_Materias")
+                    b.HasOne("AsistenciaGR.Models.CarrerasMaterias", "Carreras_Materias")
                         .WithMany("Inscripciones")
                         .HasForeignKey("CaMaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AsistenciaGR.Models.Usuarios", "Usuarios")
+                    b.HasOne("AsistenciaGR.Models.Usuario", "Usuarios")
                         .WithMany("Inscripciones")
                         .HasForeignKey("UsId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -266,36 +266,36 @@ namespace AsistenciaGR.Migrations
                     b.Navigation("Usuarios");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Usuarios", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Usuario", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.Roles", "Roles")
+                    b.HasOne("AsistenciaGR.Models.Rol", "Roles")
                         .WithMany("Usuarios")
                         .HasForeignKey("RolesRoId");
 
                     b.Navigation("Roles");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Carreras", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Carrera", b =>
                 {
                     b.Navigation("Carreras_Materias");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Carreras_Materias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.CarrerasMaterias", b =>
                 {
                     b.Navigation("Inscripciones");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Materias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Materia", b =>
                 {
                     b.Navigation("Carreras_Materias");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Roles", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Rol", b =>
                 {
                     b.Navigation("Usuarios");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.Usuarios", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Usuario", b =>
                 {
                     b.Navigation("Inscripciones");
                 });

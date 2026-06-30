@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AsistenciaGR.Data;
+using AsistenciaGR.DTO;
+using AsistenciaGR.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using AsistenciaGR.Data;
-using AsistenciaGR.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AsistenciaGR.Controllers
 {
@@ -19,141 +20,195 @@ namespace AsistenciaGR.Controllers
             _context = context;
         }
 
-        // GET: Materias
+        // GET: MATERIAS
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Materias.ToListAsync());
-        }
-
-        // GET: Materias/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var materias = await _context.Materias
-                .FirstOrDefaultAsync(m => m.MaId == id);
-            if (materias == null)
-            {
-                return NotFound();
-            }
+                .Select(m => new MateriaDetalleDto
+                {
+                    MaId = m.MaId,
+                    MaDenominacion = m.MaDenominacion,
+                    MaModalidad = m.MaModalidad,
+                    MaCantModulos = m.MaCantModulos,
+                    CarreraMateriasCount = m.CarreraMaterias != null ? m.CarreraMaterias.Count : 0
+                })
+                .ToListAsync();
 
             return View(materias);
         }
 
-        // GET: Materias/Create
-        public IActionResult Create()
+        // GET: MATERIAS/Details/5
+        public async Task<IActionResult> Details(int? MaId)
         {
-            ViewData["CaId"] = new SelectList(_context.Carreras, "CaId", "CaDenominacion");
-            return View();
+            if (MaId == null)
+            {
+                return NotFound();
+            }
+
+            var materia = await _context.Materias
+                .Where(m => m.MaId == MaId)
+                .Select(m => new MateriaDetalleDto
+                {
+                    MaId = m.MaId,
+                    MaDenominacion = m.MaDenominacion,
+                    MaModalidad = m.MaModalidad,
+                    MaCantModulos = m.MaCantModulos,
+                    CarreraMateriasCount = m.CarreraMaterias != null ? m.CarreraMaterias.Count : 0
+                })
+                .FirstOrDefaultAsync();
+
+            if (materia == null)
+            {
+                return NotFound();
+            }
+
+            return View(materia);
         }
 
-        // POST: Materias/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // GET: MATERIAS/Create
+        public IActionResult Create()
+        {
+            return View(new MateriaCrearDto());
+        }
+
+        // POST: MATERIAS/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MaId,MaDenominacion,MaModalidad,MaCantHoras,CaId")] Materias materias)
+        public async Task<IActionResult> Create(MateriaCrearDto materiaDto)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(materias);
+                var materia = new Materia
+                {
+                    MaDenominacion = materiaDto.MaDenominacion ?? string.Empty,
+                    MaModalidad = materiaDto.MaModalidad,
+                    MaCantModulos = materiaDto.MaCantModulos
+                };
+
+                _context.Add(materia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CaId"] = new SelectList(_context.Carreras, "CaId", "CaDenominacion", materias.CaId);
-            return View(materias);
+
+            return View(materiaDto);
         }
 
-        // GET: Materias/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: MATERIAS/Edit/5
+        public async Task<IActionResult> Edit(int? MaId)
         {
-            if (id == null)
+            if (MaId == null)
             {
                 return NotFound();
             }
 
-            var materias = await _context.Materias.FindAsync(id);
-            if (materias == null)
+            var materia = await _context.Materias.FindAsync(MaId);
+            if (materia == null)
             {
                 return NotFound();
             }
-            return View(materias);
+
+            var materiaDto = new MateriaCrearDto
+            {
+                MaId = materia.MaId,
+                MaDenominacion = materia.MaDenominacion,
+                MaModalidad = materia.MaModalidad,
+                MaCantModulos = materia.MaCantModulos
+            };
+
+            return View(materiaDto);
         }
 
-        // POST: Materias/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: MATERIAS/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MaId,MaDenominacion,MaModalidad,MaCantHoras,CaId")] Materias materias)
+        public async Task<IActionResult> Edit(int? MaId, MateriaCrearDto materiaDto)
         {
-            if (id != materias.MaId)
+            if (MaId != materiaDto.MaId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
+                return View(materiaDto);
+            }
+
+            var materia = await _context.Materias.FindAsync(MaId);
+            if (materia == null)
+            {
+                return NotFound();
+            }
+
+            materia.MaDenominacion = materiaDto.MaDenominacion ?? string.Empty;
+            materia.MaModalidad = materiaDto.MaModalidad;
+            materia.MaCantModulos = materiaDto.MaCantModulos;
+
+            try
+            {
+                _context.Update(materia);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!MateriaExists(materia.MaId))
                 {
-                    _context.Update(materias);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!MateriasExists(materias.MaId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(materias);
-        }
-
-        // GET: Materias/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
             }
 
-            var materias = await _context.Materias
-                .FirstOrDefaultAsync(m => m.MaId == id);
-            if (materias == null)
-            {
-                return NotFound();
-            }
-
-            return View(materias);
-        }
-
-        // POST: Materias/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var materias = await _context.Materias.FindAsync(id);
-            if (materias != null)
-            {
-                _context.Materias.Remove(materias);
-            }
-
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MateriasExists(int id)
+        // GET: MATERIAS/Delete/5
+        public async Task<IActionResult> Delete(int? MaId)
         {
-            return _context.Materias.Any(e => e.MaId == id);
+            if (MaId == null)
+            {
+                return NotFound();
+            }
+
+            var materia = await _context.Materias
+                .Where(m => m.MaId == MaId)
+                .Select(m => new MateriaDetalleDto
+                {
+                    MaId = m.MaId,
+                    MaDenominacion = m.MaDenominacion,
+                    MaModalidad = m.MaModalidad,
+                    MaCantModulos = m.MaCantModulos,
+                    CarreraMateriasCount = m.CarreraMaterias != null ? m.CarreraMaterias.Count : 0
+                })
+                .FirstOrDefaultAsync();
+
+            if (materia == null)
+            {
+                return NotFound();
+            }
+
+            return View(materia);
+        }
+
+        // POST: MATERIAS/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int? MaId)
+        {
+            var materia = await _context.Materias.FindAsync(MaId);
+            if (materia != null)
+            {
+                _context.Materias.Remove(materia);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool MateriaExists(int? MaId)
+        {
+            return _context.Materias.Any(e => e.MaId == MaId);
         }
     }
 }

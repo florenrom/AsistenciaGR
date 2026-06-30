@@ -55,7 +55,7 @@ namespace AsistenciaGR.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UsId,UsApellido,UsNombre,UsDNI,RoId")] Usuarios usuarios)
+        public async Task<IActionResult> Create([Bind("UsId,UsApellido,UsNombre,UsDNI,RoId")] Usuario usuarios)
         {
             if (ModelState.IsValid)
             {
@@ -88,7 +88,7 @@ namespace AsistenciaGR.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UsId,UsApellido,UsNombre,UsDNI,RoId")] Usuarios usuarios)
+        public async Task<IActionResult> Edit(int id, [Bind("UsId,UsApellido,UsNombre,UsDNI,RoId")] Usuario usuarios)
         {
             if (id != usuarios.UsId)
             {
