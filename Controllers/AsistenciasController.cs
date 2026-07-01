@@ -129,7 +129,7 @@ namespace AsistenciaGR.Controllers
 
         // GET: Asistencias/AsistenciaGlobal
         // Vista estática para asistencia global (diseño)
-        
+
         public async Task<IActionResult> AsistenciaGlobal(int? CaMaId)
         {
             var model = new AsistenciaGlobalViewModel();
@@ -151,37 +151,53 @@ namespace AsistenciaGR.Controllers
             }
 
             // Buscar los alumnos inscriptos en esa materia
+            // Una sola consulta para traer alumnos y sus IDs
             var estudiantes = await _context.Inscripciones
                 .Where(i => i.CaMaId == CaMaId)
                 .Select(i => i.Usuarios)
                 .Where(u => u != null && u.RoId == role.RoId)
                 .ToListAsync();
 
+            var usIdsInscritos = estudiantes
+                .Select(u => u.UsId)
+                .ToList(); // ya está en memoria, no va a la BD de nuevo
+
+            // Paso 2: traer las asistencias de esos alumnos
+            var todasLasAsistencias = await _context.Asistencias
+            .Where(a => a.UsId.HasValue && usIdsInscritos.Contains(a.UsId.Value))
+            .ToListAsync();
+
+            model.Fechas = todasLasAsistencias
+            .Where(a => a.AsFecha.HasValue)
+            .Select(a => a.AsFecha.Value.Date)
+            .Distinct()
+            .OrderBy(f => f)
+            .ToList();
+
+            // Armar una fila por alumno
             foreach (var alumno in estudiantes)
             {
-                // Buscar las asistencias del alumno
-                var asistencias = await _context.Asistencias
+                var asistenciasAlumno = todasLasAsistencias
                     .Where(a => a.UsId == alumno.UsId)
-                    .ToListAsync();
+                    .ToList();
 
-                int totalClases = asistencias.Count;
+                var asistenciaPorFecha = model.Fechas
+                .ToDictionary(
+                fecha => fecha,
+                fecha => asistenciasAlumno
+                .Any(a => a.AsFecha.HasValue && a.AsFecha.Value.Date == fecha && a.AsPresente)
+                );
 
-                int presentes = asistencias.Count(a => a.AsPresente);
-
-                double porcentaje = 0;
-
-                if (totalClases > 0)
-                {
-                    porcentaje = (double)presentes * 100 / totalClases;
-                }
+                int presentes = asistenciaPorFecha.Values.Count(v => v);
+                int total = model.Fechas.Count;
+                decimal porcentaje = total > 0 ? Math.Round((decimal)presentes / total * 100, 1) : 0;
 
                 model.Rows.Add(new AsistenciaGlobalRowViewModel
                 {
                     UsId = alumno.UsId,
                     FullName = $"{alumno.UsApellido} {alumno.UsNombre}",
-                    TotalClases = totalClases,
-                    Presentes = presentes,
-                    Porcentaje = porcentaje
+                    AsistenciaPorFecha = asistenciaPorFecha,
+                    PorcentajeAsistencia = porcentaje
                 });
             }
 

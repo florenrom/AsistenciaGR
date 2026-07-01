@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using AsistenciaGR.Models;
 using AsistenciaGR.Data;
 
-public class Carreras_MateriasController : Controller
+public class CarreraMateriasController : Controller
 {
     private readonly AsistenciaGRContext _context;
 
-    public Carreras_MateriasController(AsistenciaGRContext context)
+    public CarreraMateriasController(AsistenciaGRContext context)
     {
         _context = context;
     }

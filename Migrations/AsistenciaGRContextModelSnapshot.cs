@@ -17,7 +17,7 @@ namespace AsistenciaGR.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.12")
+                .HasAnnotation("ProductVersion", "9.0.17")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -51,6 +51,9 @@ namespace AsistenciaGR.Migrations
                     b.Property<int?>("UsId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UsuarioUsId")
+                        .HasColumnType("int");
+
                     b.HasKey("AsId");
 
                     b.HasIndex("CaMaId");
@@ -58,6 +61,8 @@ namespace AsistenciaGR.Migrations
                     b.HasIndex("MateriasMaId");
 
                     b.HasIndex("UsId");
+
+                    b.HasIndex("UsuarioUsId");
 
                     b.ToTable("Asistencias");
                 });
@@ -72,14 +77,43 @@ namespace AsistenciaGR.Migrations
 
                     b.Property<string>("CaDenominacion")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("MateriaMaId")
+                        .HasColumnType("int");
 
                     b.HasKey("CaId");
+
+                    b.HasIndex("MateriaMaId");
 
                     b.ToTable("Carreras");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.CarrerasMaterias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.CarreraCohorte", b =>
+                {
+                    b.Property<int>("CaCoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CaCoId"));
+
+                    b.Property<int>("CaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CaCoId");
+
+                    b.HasIndex("CaId");
+
+                    b.HasIndex("CoId");
+
+                    b.ToTable("CarreraCohorte");
+                });
+
+            modelBuilder.Entity("AsistenciaGR.Models.CarreraMateria", b =>
                 {
                     b.Property<int>("CaMaId")
                         .ValueGeneratedOnAdd()
@@ -90,26 +124,40 @@ namespace AsistenciaGR.Migrations
                     b.Property<int>("CaId")
                         .HasColumnType("int");
 
-                    b.Property<string>("CaMaDenominacion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("CarrerasCaId")
-                        .HasColumnType("int");
-
                     b.Property<int>("MaId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MateriasMaId")
+                    b.Property<int?>("UsuarioUsId")
                         .HasColumnType("int");
 
                     b.HasKey("CaMaId");
 
-                    b.HasIndex("CarrerasCaId");
+                    b.HasIndex("CaId");
 
-                    b.HasIndex("MateriasMaId");
+                    b.HasIndex("MaId");
+
+                    b.HasIndex("UsuarioUsId");
 
                     b.ToTable("CarrerasMaterias");
+                });
+
+            modelBuilder.Entity("AsistenciaGR.Models.Cohorte", b =>
+                {
+                    b.Property<int>("CoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CoId"));
+
+                    b.Property<int>("CoAnio")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CoEstado")
+                        .HasColumnType("bit");
+
+                    b.HasKey("CoId");
+
+                    b.ToTable("Cohorte");
                 });
 
             modelBuilder.Entity("AsistenciaGR.Models.Inscripciones", b =>
@@ -123,14 +171,20 @@ namespace AsistenciaGR.Migrations
                     b.Property<int>("CaMaId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Carreras_MateriasCaMaId")
+                        .HasColumnType("int");
+
                     b.Property<int>("UsId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UsuariosUsId")
                         .HasColumnType("int");
 
                     b.HasKey("InId");
 
-                    b.HasIndex("CaMaId");
+                    b.HasIndex("Carreras_MateriasCaMaId");
 
-                    b.HasIndex("UsId");
+                    b.HasIndex("UsuariosUsId");
 
                     b.ToTable("Inscripciones");
                 });
@@ -143,19 +197,27 @@ namespace AsistenciaGR.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaId"));
 
+                    b.Property<int>("AsId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CaId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaCantHoras")
+                    b.Property<int>("CaMaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaCantModulos")
                         .HasColumnType("int");
 
                     b.Property<string>("MaDenominacion")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("MaModalidad")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.HasKey("MaId");
 
@@ -172,7 +234,8 @@ namespace AsistenciaGR.Migrations
 
                     b.Property<string>("RoDenominacion")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("RoId");
 
@@ -187,43 +250,61 @@ namespace AsistenciaGR.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsId"));
 
+                    b.Property<int?>("CaCoId")
+                        .HasColumnType("int");
+
                     b.Property<int>("RoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RolesRoId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UsApellido")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UsContrasena")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UsDNI")
+                    b.Property<int>("UsDni")
                         .HasColumnType("int");
+
+                    b.Property<string>("UsEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UsNombre")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("UsId");
 
-                    b.HasIndex("RolesRoId");
+                    b.HasIndex("CaCoId");
+
+                    b.HasIndex("RoId");
 
                     b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("AsistenciaGR.Models.Asistencia", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.CarrerasMaterias", "CarreraMateria")
+                    b.HasOne("AsistenciaGR.Models.CarreraMateria", "CarreraMateria")
                         .WithMany()
                         .HasForeignKey("CaMaId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("AsistenciaGR.Models.Materia", "Materias")
-                        .WithMany()
+                        .WithMany("Asistencias")
                         .HasForeignKey("MateriasMaId");
 
                     b.HasOne("AsistenciaGR.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsId")
                         .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("AsistenciaGR.Models.Usuario", null)
+                        .WithMany("Asistencias")
+                        .HasForeignKey("UsuarioUsId");
 
                     b.Navigation("CarreraMateria");
 
@@ -232,34 +313,64 @@ namespace AsistenciaGR.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.CarrerasMaterias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Carrera", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.Carrera", "Carreras")
-                        .WithMany("Carreras_Materias")
-                        .HasForeignKey("CarrerasCaId");
+                    b.HasOne("AsistenciaGR.Models.Materia", null)
+                        .WithMany("Carreras")
+                        .HasForeignKey("MateriaMaId");
+                });
 
-                    b.HasOne("AsistenciaGR.Models.Materia", "Materias")
-                        .WithMany("Carreras_Materias")
-                        .HasForeignKey("MateriasMaId");
+            modelBuilder.Entity("AsistenciaGR.Models.CarreraCohorte", b =>
+                {
+                    b.HasOne("AsistenciaGR.Models.Carrera", "Carrera")
+                        .WithMany("CarreraCohortes")
+                        .HasForeignKey("CaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Carreras");
+                    b.HasOne("AsistenciaGR.Models.Cohorte", "Cohorte")
+                        .WithMany("CarreraCohortes")
+                        .HasForeignKey("CoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Materias");
+                    b.Navigation("Carrera");
+
+                    b.Navigation("Cohorte");
+                });
+
+            modelBuilder.Entity("AsistenciaGR.Models.CarreraMateria", b =>
+                {
+                    b.HasOne("AsistenciaGR.Models.Carrera", "Carrera")
+                        .WithMany("CarreraMaterias")
+                        .HasForeignKey("CaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AsistenciaGR.Models.Materia", "Materia")
+                        .WithMany("CarreraMaterias")
+                        .HasForeignKey("MaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AsistenciaGR.Models.Usuario", null)
+                        .WithMany("CarreraMaterias")
+                        .HasForeignKey("UsuarioUsId");
+
+                    b.Navigation("Carrera");
+
+                    b.Navigation("Materia");
                 });
 
             modelBuilder.Entity("AsistenciaGR.Models.Inscripciones", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.CarrerasMaterias", "Carreras_Materias")
-                        .WithMany("Inscripciones")
-                        .HasForeignKey("CaMaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("AsistenciaGR.Models.CarreraMateria", "Carreras_Materias")
+                        .WithMany()
+                        .HasForeignKey("Carreras_MateriasCaMaId");
 
                     b.HasOne("AsistenciaGR.Models.Usuario", "Usuarios")
-                        .WithMany("Inscripciones")
-                        .HasForeignKey("UsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("UsuariosUsId");
 
                     b.Navigation("Carreras_Materias");
 
@@ -268,26 +379,40 @@ namespace AsistenciaGR.Migrations
 
             modelBuilder.Entity("AsistenciaGR.Models.Usuario", b =>
                 {
-                    b.HasOne("AsistenciaGR.Models.Rol", "Roles")
-                        .WithMany("Usuarios")
-                        .HasForeignKey("RolesRoId");
+                    b.HasOne("AsistenciaGR.Models.CarreraCohorte", "CarreraCohorte")
+                        .WithMany()
+                        .HasForeignKey("CaCoId");
 
-                    b.Navigation("Roles");
+                    b.HasOne("AsistenciaGR.Models.Rol", "Rol")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("RoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CarreraCohorte");
+
+                    b.Navigation("Rol");
                 });
 
             modelBuilder.Entity("AsistenciaGR.Models.Carrera", b =>
                 {
-                    b.Navigation("Carreras_Materias");
+                    b.Navigation("CarreraCohortes");
+
+                    b.Navigation("CarreraMaterias");
                 });
 
-            modelBuilder.Entity("AsistenciaGR.Models.CarrerasMaterias", b =>
+            modelBuilder.Entity("AsistenciaGR.Models.Cohorte", b =>
                 {
-                    b.Navigation("Inscripciones");
+                    b.Navigation("CarreraCohortes");
                 });
 
             modelBuilder.Entity("AsistenciaGR.Models.Materia", b =>
                 {
-                    b.Navigation("Carreras_Materias");
+                    b.Navigation("Asistencias");
+
+                    b.Navigation("CarreraMaterias");
+
+                    b.Navigation("Carreras");
                 });
 
             modelBuilder.Entity("AsistenciaGR.Models.Rol", b =>
@@ -297,7 +422,9 @@ namespace AsistenciaGR.Migrations
 
             modelBuilder.Entity("AsistenciaGR.Models.Usuario", b =>
                 {
-                    b.Navigation("Inscripciones");
+                    b.Navigation("Asistencias");
+
+                    b.Navigation("CarreraMaterias");
                 });
 #pragma warning restore 612, 618
         }
