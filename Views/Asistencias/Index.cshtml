@@ -1,50 +1,43 @@
-﻿@{
-    ViewData["Title"] = "Asistencias";
-}
+﻿@model AsistenciaGR.DTO.HomeIndexDto
 
-<div class="asistencia-page" style="min-height:80vh;padding-top:40px;">
-    <div style="display:flex;justify-content:center;">
-        <div style="width:560px;background:#fff;border-radius:16px;padding:32px;box-shadow:0 60px 40px rgba(0,0,0,0.35);">
-            <div style="text-align:center;margin-bottom:10px;">
-                <span style="background:#ccefff;padding:8px 24px;border-radius:20px;color:#fff;font-weight:600;">Inicio</span>
-            </div>
-            <form asp-action="Asistencia" method="get">
-                <div class="form-group" style="margin-bottom:24px;">
-                    <label class="control-label" style="font-weight:700;">Carrera / Materia:</label>
-                    <select name="CaMaId" class="form-control" asp-items="@(ViewData["CaMaId"] as SelectList)" style="margin-top:8px;border-radius:8px;padding:12px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.06);">
-                        <option value="">-- Seleccione una Carrera/Materia --</option>
-                    </select>
-                </div>
-
-                <div style="text-align:center;">
-                    <button type="submit" class="btn btn-primary" style="background:#083c8a;border-radius:26px;padding:10px 36px;border:none;">Siguiente</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 @{
-    ViewData["Title"] = "Asistencias";
+    ViewData["Title"] = "Inicio";
+    ViewData["BodyClass"] = "inicio-page";
 }
 
-<div class="asistencia-page" style="min-height:80vh;padding-top:40px;">
-    <div style="display:flex;justify-content:center;">
-        <div style="width:560px;background:#fff;border-radius:16px;padding:32px;box-shadow:0 60px 40px rgba(0,0,0,0.35);">
-            <div style="text-align:center;margin-bottom:10px;">
-                <span style="background:#ccefff;padding:8px 24px;border-radius:20px;color:#fff;font-weight:600;">Inicio</span>
-            </div>
-            <form asp-action="Asistencia" method="get">
-                <div class="form-group" style="margin-bottom:24px;">
-                    <label class="control-label" style="font-weight:700;">Carrera / Materia:</label>
-                    <select name="CaMaId" class="form-control" asp-items="@(ViewData["CaMaId"] as SelectList)" style="margin-top:8px;border-radius:8px;padding:12px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.06);">
-                        <option value="">-- Seleccione una Carrera/Materia --</option>
-                    </select>
-                </div>
-
-                <div style="text-align:center;">
-                    <button type="submit" class="btn btn-primary" style="background:#083c8a;border-radius:26px;padding:10px 36px;border:none;">Siguiente</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div class="page-title-container">
+    <h2 class="page-main-title">Gestión de Asistencia</h2>
+    <p class="page-subtitle" style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Seleccione la carrera y materia para continuar</p>
 </div>
+
+<main class="main-container-form">
+    <div class="form-card">
+        <form asp-controller="Asistencias" asp-action="Index" method="get" class="form-grid">
+            <div class="input-field" style="grid-column: span 2;">
+                <label for="carrera">Carrera</label>
+                <select asp-for="SelectedCarreraId" id="carrera" class="custom-select" required>
+                    <option value="" disabled selected>Seleccione una Carrera</option>
+                    @foreach (var carrera in Model.Carreras)
+                    {
+                        <option value="@carrera.CaId">@carrera.CaDenominacion</option>
+                    }
+                </select>
+            </div>
+
+            <div class="input-field" style="grid-column: span 2;">
+                <label for="materia">Materia</label>
+                <select asp-for="SelectedMateriaId" id="materia" class="custom-select" required>
+                    <option value="" disabled selected>Seleccione una Materia</option>
+                    @foreach (var materia in Model.Materias)
+                    {
+                        <option value="@materia.MaId">@materia.MaDenominacion</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-buttons" style="grid-column: span 2; justify-content: center; margin-top: 15px;">
+                <button type="submit" class="btn-save" id="btnSiguiente" style="width: 100%; padding: 14px;">Configurar Asistencia</button>
+            </div>
+        </form>
+    </div>
+</main>
