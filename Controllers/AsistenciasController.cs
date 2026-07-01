@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static AsistenciaGR.Models.AsistenciaGlobalViewModel;
 
 namespace AsistenciaGR.Controllers
 {
@@ -128,14 +129,70 @@ namespace AsistenciaGR.Controllers
 
         // GET: Asistencias/AsistenciaGlobal
         // Vista estática para asistencia global (diseño)
-        public IActionResult AsistenciaGlobal()
+        
+        public async Task<IActionResult> AsistenciaGlobal(int? CaMaId)
         {
-            return View();
+            var model = new AsistenciaGlobalViewModel();
+
+            if (CaMaId == null)
+            {
+                return View(model);
+            }
+
+            model.CaMaId = CaMaId;
+
+            // Buscar el rol Estudiante
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(r => r.RoDenominacion == "Estudiante");
+
+            if (role == null)
+            {
+                return View(model);
+            }
+
+            // Buscar los alumnos inscriptos en esa materia
+            var estudiantes = await _context.Inscripciones
+                .Where(i => i.CaMaId == CaMaId)
+                .Select(i => i.Usuarios)
+                .Where(u => u != null && u.RoId == role.RoId)
+                .ToListAsync();
+
+            foreach (var alumno in estudiantes)
+            {
+                // Buscar las asistencias del alumno
+                var asistencias = await _context.Asistencias
+                    .Where(a => a.UsId == alumno.UsId)
+                    .ToListAsync();
+
+                int totalClases = asistencias.Count;
+
+                int presentes = asistencias.Count(a => a.AsPresente);
+
+                double porcentaje = 0;
+
+                if (totalClases > 0)
+                {
+                    porcentaje = (double)presentes * 100 / totalClases;
+                }
+
+                model.Rows.Add(new AsistenciaGlobalRowViewModel
+                {
+                    UsId = alumno.UsId,
+                    FullName = $"{alumno.UsApellido} {alumno.UsNombre}",
+                    TotalClases = totalClases,
+                    Presentes = presentes,
+                    Porcentaje = porcentaje
+                });
+            }
+
+            return View(model);
         }
 
         private bool AsistenciaExists(int id)
         {
             return _context.Asistencias.Any(e => e.AsId == id);
         }
+
+        
     }
 }
