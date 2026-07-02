@@ -53,6 +53,22 @@ namespace AsistenciaGR.Controllers
                 SelectedMateriaId = selectedMateriaId
             };
 
+            // If both Carrera and Materia were selected, resolve the corresponding CaMaId
+            if (selectedCarreraId.HasValue && selectedMateriaId.HasValue)
+            {
+                var caMa = await _context.CarrerasMaterias
+                    .FirstOrDefaultAsync(cm => cm.CaId == selectedCarreraId.Value && cm.MaId == selectedMateriaId.Value);
+
+                if (caMa != null)
+                {
+                    // redirect to Asistencia action with the resolved CaMaId
+                    return RedirectToAction(nameof(Asistencia), new { CaMaId = caMa.CaMaId });
+                }
+
+                // if no matching CarreraMateria found, add model error and show index with message
+                ModelState.AddModelError(string.Empty, "No existe una relación Carrera-Materia para la selección realizada.");
+            }
+
             return View(dto);
         }
 

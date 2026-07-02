@@ -68,29 +68,26 @@ namespace AsistenciaGR.Controllers
         // GET: MATERIAS/Create
         public IActionResult Create()
         {
-            return View(new MateriaCrearDto());
+            // populate carreras list for select CaId
+            ViewData["CaId"] = new SelectList(_context.Carreras, "CaId", "CaDenominacion");
+            return View(new Materia());
         }
 
         // POST: MATERIAS/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(MateriaCrearDto materiaDto)
+        public async Task<IActionResult> Create(Materia materia)
         {
             if (ModelState.IsValid)
             {
-                var materia = new Materia
-                {
-                    MaDenominacion = materiaDto.MaDenominacion ?? string.Empty,
-                    MaModalidad = materiaDto.MaModalidad,
-                    MaCantModulos = materiaDto.MaCantModulos
-                };
-
                 _context.Add(materia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(materiaDto);
+            // repopulate carreras select when returning view on error
+            ViewData["CaId"] = new SelectList(_context.Carreras, "CaId", "CaDenominacion", materia.CaId);
+            return View(materia);
         }
 
         // GET: MATERIAS/Edit/5
