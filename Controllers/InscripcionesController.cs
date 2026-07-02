@@ -21,7 +21,7 @@ public class InscripcionesController : Controller
     }
 
     // GET: INSCRIPCIONESS/Details/5
-    public async Task<IActionResult> Details(int? inid)
+    public async Task<IActionResult> GestionInscripcionesMaterias(int? inid)
     {
         if (inid == null)
         {
@@ -39,7 +39,7 @@ public class InscripcionesController : Controller
     }
 
     // GET: INSCRIPCIONESS/Create
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> AgregarInscripcionMateria()
     {
         // find role id for 'Estudiante' (case-insensitive)
         var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoDenominacion.ToLower() == "estudiante");
@@ -77,7 +77,7 @@ public class InscripcionesController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("InId,UsId,CaMaId")] Inscripciones inscripciones)
+    public async Task<IActionResult> AgregarInscripcionMateria([Bind("InId,UsId,CaMaId")] Inscripciones inscripciones)
     {
         if (ModelState.IsValid)
         {
@@ -105,7 +105,7 @@ public class InscripcionesController : Controller
     }
 
     // GET: INSCRIPCIONESS/Edit/5
-    public async Task<IActionResult> Edit(int? inid)
+    public async Task<IActionResult> ModificarInscripcionMateria(int? inid)
     {
         if (inid == null)
         {
@@ -140,7 +140,7 @@ public class InscripcionesController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? inid, [Bind("InId,UsId,CaMaId,Usuarios,Carreras_Materias")] Inscripciones inscripciones)
+    public async Task<IActionResult> ModificarInscripcionMateria(int? inid, [Bind("InId,UsId,CaMaId,Usuarios,Carreras_Materias")] Inscripciones inscripciones)
     {
         if (inid != inscripciones.InId)
         {
@@ -183,39 +183,6 @@ public class InscripcionesController : Controller
         ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "Display", inscripciones.CaMaId);
 
         return View(inscripciones);
-    }
-
-    // GET: INSCRIPCIONESS/Delete/5
-    public async Task<IActionResult> Delete(int? inid)
-    {
-        if (inid == null)
-        {
-            return NotFound();
-        }
-
-        var inscripciones = await _context.Inscripciones
-            .FirstOrDefaultAsync(m => m.InId == inid);
-        if (inscripciones == null)
-        {
-            return NotFound();
-        }
-
-        return View(inscripciones);
-    }
-
-    // POST: INSCRIPCIONESS/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? inid)
-    {
-        var inscripciones = await _context.Inscripciones.FindAsync(inid);
-        if (inscripciones != null)
-        {
-            _context.Inscripciones.Remove(inscripciones);
-        }
-
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
     }
 
     private bool InscripcionesExists(int? inid)
