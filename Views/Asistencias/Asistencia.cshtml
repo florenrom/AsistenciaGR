@@ -37,10 +37,19 @@
                                 <input type="hidden" name="Rows[@i].UsId" value="@Model.Rows[i].UsId" />
                             </td>
                             <td style="padding:8px;border:1px solid #083c8a;">
-                                @for (int m = 0; m < 4; m++)
-                                {
-                                    <input type="checkbox" name="Rows[@i].Modulos[@m]" value="true" @(Model.Rows[i].Modulos[m] ? "checked" : "") style="margin-right:6px;" />
+                                @{
+                                    var moduleCount = ViewData["MaCantModulos"] as int? ?? Model.ModuleCount;
                                 }
+                                @for (int m = 0; m < moduleCount; m++)
+                                {
+                                    var isChecked = (Model.Rows[i].Modulos != null && Model.Rows[i].Modulos.Count > m) ? Model.Rows[i].Modulos[m] : false;
+                                    <input type="checkbox" name="Rows[@i].Modulos[@m]" value="true" @(isChecked ? "checked" : "") style="margin-right:6px;" />
+                                }
+                                <span style="margin-left:8px;font-weight:bold;">@{
+                                    var mc = moduleCount > 0 ? moduleCount : 1;
+                                    var checkedCount = Model.Rows[i].Modulos != null ? Model.Rows[i].Modulos.Count(x => x) : 0;
+                                    var pct = Math.Round((decimal)checkedCount / mc * 100, 1);
+                                } @pct% </span>
                             </td>
                             <td style="padding:8px;border:1px solid #083c8a;text-align:center;">
                                 <input type="checkbox" name="Rows[@i].AsJustificacion" value="true" @(Model.Rows[i].AsJustificacion ? "checked" : "") />
@@ -52,8 +61,10 @@
             </table>
         </div>
 
-        <div style="text-align:center;margin-top:24px;">
+        <div style="text-align:center;margin-top:24px;display:flex;justify-content:center;gap:12px;">
             <button type="submit" class="btn btn-primary" style="background:#083c8a;border-radius:26px;padding:12px 40px;border:none;">Guardar</button>
+            <a asp-action="Index" asp-controller="Asistencias" class="btn btn-secondary" style="border-radius:26px;padding:12px 28px;align-self:center;">Cancelar</a>
+            <a asp-action="AsistenciaGlobal" asp-controller="Asistencias" asp-route-CaMaId="@Model.CaMaId" class="btn btn-outline-primary" style="border-radius:26px;padding:12px 18px;align-self:center;">Ir a asistencia global</a>
         </div>
     </form>
 </main>

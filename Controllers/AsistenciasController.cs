@@ -24,6 +24,17 @@ namespace AsistenciaGR.Controllers
         // GET: Asistencias
         public async Task<IActionResult> Index(int? selectedCarreraId, int? selectedMateriaId)
         {
+            // Support alternate input names coming from the view/form (e.g. SelectedCarreraId/SelectedMateriaId)
+            if (!selectedCarreraId.HasValue)
+            {
+                var s = (Request.HasFormContentType ? Request.Form["SelectedCarreraId"].FirstOrDefault() : null) ?? Request.Query["SelectedCarreraId"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(s) && int.TryParse(s, out var v1)) selectedCarreraId = v1;
+            }
+            if (!selectedMateriaId.HasValue)
+            {
+                var s2 = (Request.HasFormContentType ? Request.Form["SelectedMateriaId"].FirstOrDefault() : null) ?? Request.Query["SelectedMateriaId"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(s2) && int.TryParse(s2, out var v2)) selectedMateriaId = v2;
+            }
             var carreras = await _context.Carreras
                 .Select(c => new CarreraDetalleDto
                 {
@@ -45,7 +56,7 @@ namespace AsistenciaGR.Controllers
                 })
                 .ToListAsync();
 
-            var dto = new HomeIndexDto
+            var modelDto = new HomeIndexDto
             {
                 Carreras = carreras,
                 Materias = materias,
@@ -69,7 +80,7 @@ namespace AsistenciaGR.Controllers
                 ModelState.AddModelError(string.Empty, "No existe una relación Carrera-Materia para la selección realizada.");
             }
 
-            return View(dto);
+            return View(modelDto);
         }
 
         //GET: Asistencias/Asistencia
@@ -84,25 +95,50 @@ namespace AsistenciaGR.Controllers
 
             model.CaMaId = CaMaId;
 
-            // find role 'Estudiante'
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoDenominacion == "Estudiante");
+            // find role 'Estudiante' (case-insensitive)
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoDenominacion.ToLower() == "estudiante");
             if (role == null)
             {
+                // no role configured; return empty model
                 return View(model);
             }
 
-            // find users inscribed to this Carreras_Materias via Inscripciones
-            var estudiantes = await _context.Inscripciones
-                .Where(i => i.CaMaId == CaMaId)
-                .Select(i => i.Usuarios)
-                .Where(u => u != null && u.RoId == role.RoId)
-                .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
-                .ToListAsync();
+            // find users inscribed to this Carreras_Materias via Inscripciones — ensure we load Usuario and its Rol
+            var estudiantes = await (from i in _context.Inscripciones
+                                     join u in _context.Usuarios on i.UsId equals u.UsId
+                                     where i.CaMaId == CaMaId && u.RoId == role.RoId
+                                     select new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
+                                    .ToListAsync();
+
+            // determine number of modules for this materia
+            int maCantModulos = 1; // default
+            var caMa = await _context.CarrerasMaterias.FirstOrDefaultAsync(cm => cm.CaMaId == CaMaId);
+            if (caMa != null)
+            {
+                var materia = await _context.Materias.FindAsync(caMa.MaId);
+                if (materia != null)
+                {
+                    if (materia.MaCantModulos.HasValue && materia.MaCantModulos.Value > 0)
+                    {
+                        maCantModulos = materia.MaCantModulos.Value;
+                    }
+                    else
+                    {
+                        maCantModulos = 1;
+                    }
+                }
+            }
 
             foreach (var s in estudiantes)
             {
-                model.Rows.Add(new AsistenciaRowViewModel { UsId = s.UsId, FullName = s.FullName });
+                var row = new AsistenciaRowViewModel { UsId = s.UsId, FullName = s.FullName };
+                // initialize Modulos list according to MaCantModulos
+                row.Modulos = Enumerable.Range(0, maCantModulos).Select(_ => false).ToList();
+                model.Rows.Add(row);
             }
+
+            ViewData["MaCantModulos"] = maCantModulos;
+            model.ModuleCount = maCantModulos;
 
             var caMaName = await _context.CarrerasMaterias
                 .Where(cm => cm.CaMaId == CaMaId)
@@ -124,9 +160,16 @@ namespace AsistenciaGR.Controllers
 
             var carreraMateria = await _context.CarrerasMaterias.FindAsync(model.CaMaId.Value);
 
+            int moduleCount = model.ModuleCount > 0 ? model.ModuleCount : 1;
             foreach (var row in model.Rows)
             {
-                var presente = row.Modulos != null && row.Modulos.Any(x => x);
+                var checkedCount = row.Modulos != null ? row.Modulos.Count(x => x) : 0;
+                var presente = checkedCount > 0;
+                decimal porcentaje = 0;
+                if (moduleCount > 0)
+                {
+                    porcentaje = Math.Round((decimal)checkedCount / moduleCount * 100, 1);
+                }
 
                 var entity = new Asistencia
                 {
@@ -134,6 +177,7 @@ namespace AsistenciaGR.Controllers
                     AsPresente = presente,
                     AsJustificacion = row.AsJustificacion,
                     UsId = row.UsId,
+                    AsPorcentaje = porcentaje
                 };
 
                 _context.Asistencias.Add(entity);
@@ -157,31 +201,29 @@ namespace AsistenciaGR.Controllers
 
             model.CaMaId = CaMaId;
 
-            // Buscar el rol Estudiante
+            // Buscar el rol Estudiante (case-insensitive)
             var role = await _context.Roles
-                .FirstOrDefaultAsync(r => r.RoDenominacion == "Estudiante");
+                .FirstOrDefaultAsync(r => r.RoDenominacion.ToLower() == "estudiante");
 
             if (role == null)
             {
                 return View(model);
             }
 
-            // Buscar los alumnos inscriptos en esa materia
-            // Una sola consulta para traer alumnos y sus IDs
-            var estudiantes = await _context.Inscripciones
-                .Where(i => i.CaMaId == CaMaId)
-                .Select(i => i.Usuarios)
-                .Where(u => u != null && u.RoId == role.RoId)
-                .ToListAsync();
+            // Buscar los alumnos inscriptos en esa materia (únicos)
+            var estudiantes = await (from i in _context.Inscripciones
+                                     join u in _context.Usuarios on i.UsId equals u.UsId
+                                     where i.CaMaId == CaMaId && u.RoId == role.RoId
+                                     select u)
+                                    .Distinct()
+                                    .ToListAsync();
 
-            var usIdsInscritos = estudiantes
-                .Select(u => u.UsId)
-                .ToList(); // ya está en memoria, no va a la BD de nuevo
+            var usIdsInscritos = estudiantes.Select(u => u.UsId).ToList();
 
-            // Paso 2: traer las asistencias de esos alumnos
+            // Paso 2: traer las asistencias de esos alumnos filtradas por la materia
             var todasLasAsistencias = await _context.Asistencias
-            .Where(a => a.UsId.HasValue && usIdsInscritos.Contains(a.UsId.Value))
-            .ToListAsync();
+                .Where(a => a.CaMaId == CaMaId && a.UsId.HasValue && usIdsInscritos.Contains(a.UsId.Value))
+                .ToListAsync();
 
             model.Fechas = todasLasAsistencias
             .Where(a => a.AsFecha.HasValue)
@@ -197,23 +239,38 @@ namespace AsistenciaGR.Controllers
                     .Where(a => a.UsId == alumno.UsId)
                     .ToList();
 
-                var asistenciaPorFecha = model.Fechas
-                .ToDictionary(
-                fecha => fecha,
-                fecha => asistenciasAlumno
-                .Any(a => a.AsFecha.HasValue && a.AsFecha.Value.Date == fecha && a.AsPresente)
-                );
+                // Para cada fecha buscamos la asistencia correspondiente y usamos AsPorcentaje si está disponible
+                var asistenciaPorFecha = new Dictionary<DateTime, decimal>();
+                decimal sumaPorcentajes = 0m;
+                foreach (var fecha in model.Fechas)
+                {
+                    var registro = asistenciasAlumno
+                        .FirstOrDefault(a => a.AsFecha.HasValue && a.AsFecha.Value.Date == fecha);
+                    decimal pct = 0m;
+                    if (registro != null)
+                    {
+                        if (registro.AsPorcentaje.HasValue)
+                        {
+                            pct = registro.AsPorcentaje.Value;
+                        }
+                        else
+                        {
+                            pct = registro.AsPresente ? 100m : 0m;
+                        }
+                    }
+                    asistenciaPorFecha[fecha] = pct;
+                    sumaPorcentajes += pct;
+                }
 
-                int presentes = asistenciaPorFecha.Values.Count(v => v);
-                int total = model.Fechas.Count;
-                decimal porcentaje = total > 0 ? Math.Round((decimal)presentes / total * 100, 1) : 0;
+                int totalFechas = model.Fechas.Count;
+                decimal promedio = totalFechas > 0 ? Math.Round(sumaPorcentajes / totalFechas, 1) : 0m;
 
                 model.Rows.Add(new AsistenciaGlobalRowViewModel
                 {
                     UsId = alumno.UsId,
                     FullName = $"{alumno.UsApellido} {alumno.UsNombre}",
                     AsistenciaPorFecha = asistenciaPorFecha,
-                    PorcentajeAsistencia = porcentaje
+                    PorcentajeAsistencia = promedio
                 });
             }
 
