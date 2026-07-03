@@ -244,7 +244,7 @@ public class InscripcionesController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ModificarInscripcionMateria(int? inid, [Bind("InId,UsId,CaMaId,Usuarios,Carreras_Materias")] Inscripciones inscripciones)
+    public async Task<IActionResult> ModificarInscripcionMateria(int? inid, [Bind("InId,UsId,CaMaId,InFechaAlta,Usuarios,Carreras_Materias")] Inscripciones inscripciones)
     {
         if (inid != inscripciones.InId)
         {
@@ -288,7 +288,7 @@ public class InscripcionesController : Controller
 
         return View(inscripciones);
     }
-
+    //Bind
     private bool InscripcionesExists(int? inid)
     {
         return _context.Inscripciones.Any(e => e.InId == inid);
