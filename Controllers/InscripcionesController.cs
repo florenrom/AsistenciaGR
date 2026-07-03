@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using AsistenciaGR.Models;
+using System;
+using System.Text.Json;
 using AsistenciaGR.Data;
 
 public class InscripcionesController : Controller
@@ -20,22 +22,53 @@ public class InscripcionesController : Controller
         return View(await _context.Inscripciones.ToListAsync());
     }
 
-    // GET: INSCRIPCIONESS/Details/5
+    // GET: INSCRIPCIONESS/GestionInscripcionesMaterias or INSCRIPCIONESS/GestionInscripcionesMaterias/5
     public async Task<IActionResult> GestionInscripcionesMaterias(int? inid)
     {
         if (inid == null)
         {
-            return NotFound();
+            // No id provided: show the management/list page (the view can render a list or present UI to add/edit)
+            var all = await _context.Inscripciones
+                .Include(i => i.Usuarios)
+                .Include(i => i.Carreras_Materias).ThenInclude(cm => cm.Carrera)
+                .Include(i => i.Carreras_Materias).ThenInclude(cm => cm.Materia)
+                .ToListAsync();
+
+            // Defensive: if any navigation is null, try to load it explicitly to avoid empty cells in the view
+            for (int idx = 0; idx < all.Count; idx++)
+            {
+                var ins = all[idx];
+                if (ins.Usuarios == null)
+                {
+                    var u = await _context.Usuarios.FindAsync(ins.UsId);
+                    ins.Usuarios = u;
+                }
+
+                if (ins.Carreras_Materias == null)
+                {
+                    var cm = await _context.CarrerasMaterias
+                        .Include(x => x.Carrera)
+                        .Include(x => x.Materia)
+                        .FirstOrDefaultAsync(x => x.CaMaId == ins.CaMaId);
+                    ins.Carreras_Materias = cm;
+                }
+            }
+
+            return View(all);
         }
 
         var inscripciones = await _context.Inscripciones
+            .Include(i => i.Usuarios)
+            .Include(i => i.Carreras_Materias).ThenInclude(cm => cm.Carrera)
+            .Include(i => i.Carreras_Materias).ThenInclude(cm => cm.Materia)
             .FirstOrDefaultAsync(m => m.InId == inid);
         if (inscripciones == null)
         {
             return NotFound();
         }
 
-        return View(inscripciones);
+        // return a list with the single record so the view can render uniformly as a list
+        return View("GestionInscripcionesMaterias", new List<Inscripciones> { inscripciones });
     }
 
     // GET: INSCRIPCIONESS/Create
@@ -50,8 +83,7 @@ public class InscripcionesController : Controller
             students = await _context.Usuarios
                 .Where(u => u.RoId == role.RoId)
                 .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
-                .Cast<object>()
-                .ToListAsync();
+                .ToListAsync<object>();
         }
         else
         {
@@ -61,13 +93,27 @@ public class InscripcionesController : Controller
 
         ViewData["UsId"] = new SelectList(students, "UsId", "FullName");
 
-        // populate Carreras_Materias using concatenated Carrera - Materia as display text
+        // populate Carreras and Materias separately for the autocomplete inputs
+        var carreras = await _context.Carreras
+            .Select(c => new { c.CaId, c.CaDenominacion })
+            .ToListAsync();
+
+        var materias = await _context.Materias
+            .Select(m => new { m.MaId, m.MaDenominacion })
+            .ToListAsync();
+
+        // populate Carreras_Materias using concatenated Carrera - Materia as display text (fallback/reference)
         var cam = await _context.CarrerasMaterias
             .Include(cm => cm.Carrera)
             .Include(cm => cm.Materia)
             .Select(cm => new { cm.CaMaId, Display = (cm.Carrera != null ? cm.Carrera.CaDenominacion : "") + " - " + (cm.Materia != null ? cm.Materia.MaDenominacion : "") })
             .ToListAsync();
         ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "Display");
+
+        // expose JSON for client-side filtering
+        ViewData["StudentsJson"] = JsonSerializer.Serialize(students);
+        ViewData["CarrerasJson"] = JsonSerializer.Serialize(carreras);
+        ViewData["MateriasJson"] = JsonSerializer.Serialize(materias);
 
         return View();
     }
@@ -77,13 +123,40 @@ public class InscripcionesController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AgregarInscripcionMateria([Bind("InId,UsId,CaMaId")] Inscripciones inscripciones)
+    public async Task<IActionResult> AgregarInscripcionMateria([Bind("InId,UsId,CaMaId")] Inscripciones inscripciones, int? SelectedUsId, int? SelectedCaId, int? SelectedMaId)
     {
+        // Map frontend-selected ids into the entity before validation
+        if (SelectedUsId.HasValue)
+        {
+            inscripciones.UsId = SelectedUsId.Value;
+        }
+
+        if (SelectedCaId.HasValue && SelectedMaId.HasValue)
+        {
+            var caMa = await _context.CarrerasMaterias.FirstOrDefaultAsync(cm => cm.CaId == SelectedCaId.Value && cm.MaId == SelectedMaId.Value);
+            if (caMa != null)
+            {
+                inscripciones.CaMaId = caMa.CaMaId;
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "No existe la combinación seleccionada de Carrera y Materia.");
+            }
+        }
+
         if (ModelState.IsValid)
         {
-            _context.Add(inscripciones);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                inscripciones.InFechaAlta = DateTime.Now;
+                _context.Add(inscripciones);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(GestionInscripcionesMaterias));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "Error al guardar la inscripción: " + ex.Message);
+            }
         }
 
         // repopulate selects when returning view on error
@@ -101,6 +174,24 @@ public class InscripcionesController : Controller
             .ToListAsync();
         ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "Display", inscripciones.CaMaId);
 
+        // also repopulate JSON lists required by the autocomplete view
+        var studentsJsonList = await _context.Usuarios
+            .Include(u => u.Rol)
+            .Where(u => u.Rol != null && u.Rol.RoDenominacion == "Estudiante")
+            .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
+            .ToListAsync();
+        ViewData["StudentsJson"] = JsonSerializer.Serialize(studentsJsonList);
+
+        var carrerasJsonList = await _context.Carreras
+            .Select(c => new { c.CaId, c.CaDenominacion })
+            .ToListAsync();
+        ViewData["CarrerasJson"] = JsonSerializer.Serialize(carrerasJsonList);
+
+        var materiasJsonList = await _context.Materias
+            .Select(m => new { m.MaId, m.MaDenominacion })
+            .ToListAsync();
+        ViewData["MateriasJson"] = JsonSerializer.Serialize(materiasJsonList);
+
         return View(inscripciones);
     }
 
@@ -109,14 +200,27 @@ public class InscripcionesController : Controller
     {
         if (inid == null)
         {
-            return NotFound();
+            // No id: redirect back to management list
+            return RedirectToAction(nameof(GestionInscripcionesMaterias));
         }
 
-        var inscripciones = await _context.Inscripciones.FindAsync(inid);
+        var inscripciones = await _context.Inscripciones
+            .Include(i => i.Usuarios)
+            .Include(i => i.Carreras_Materias).ThenInclude(cm => cm.Carrera)
+            .Include(i => i.Carreras_Materias).ThenInclude(cm => cm.Materia)
+            .FirstOrDefaultAsync(i => i.InId == inid);
         if (inscripciones == null)
         {
             return NotFound();
         }
+
+        // Defensive: if Usuario navigation wasn't loaded for any reason, load explicitly
+        if (inscripciones.Usuarios == null && inscripciones.UsId != 0)
+        {
+            var u = await _context.Usuarios.FindAsync(inscripciones.UsId);
+            inscripciones.Usuarios = u;
+        }
+
         // populate selects for edit view
         var students = await _context.Usuarios
             .Include(u => u.Rol)
@@ -165,7 +269,7 @@ public class InscripcionesController : Controller
                     throw;
                 }
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(GestionInscripcionesMaterias));
         }
         // repopulate selects when returning view on error
         var students = await _context.Usuarios

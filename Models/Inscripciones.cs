@@ -8,6 +8,8 @@ namespace AsistenciaGR.Models
         public int InId { get; set; }
         public int UsId { get; set; }
         public int CaMaId { get; set; }
+        // Fecha en que se realizó la inscripción
+        public DateTime? InFechaAlta { get; set; }
         // Navigation to single Usuario (estudiante) for this inscripción
         public virtual Usuario? Usuarios { get; set; }
         // Navigation to single Carreras_Materias for this inscripción

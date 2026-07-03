@@ -1,6 +1,7 @@
 ﻿@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
+@model IEnumerable<AsistenciaGR.Models.Inscripciones>
 @{
 }
 <!DOCTYPE html>
@@ -65,48 +66,74 @@
             </div>
 
             <div class="add-btn-container">
-                <button class="btn-add" id="btnAgregar" title="Nueva Inscripción">+</button>
+                <a asp-controller="Inscripciones" asp-action="AgregarInscripcionMateria" class="btn-add" title="Nueva Inscripción">+</a>
             </div>
         </div>
 
-        <div class="global-table-container" style="margin-top: 15px;">
-            <table class="global-table">
-                <thead>
-                    <tr>
-                        <th class="align-left" style="border-top: 2px solid var(--primary-color);">ALUMNO</th>
-                        <th class="align-left" style="border-top: 2px solid var(--primary-color);">CARRERA</th>
-                        <th class="align-left" style="border-top: 2px solid var(--primary-color);">MATERIA</th>
-                        <th style="border-top: 2px solid var(--primary-color);">FECHA ALTA</th>
-                        <th style="border-top: 2px solid var(--primary-color);">ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="align-left">Albornoz Celina</td>
-                        <td class="align-left">Tec. Sup. en Desarrollo de Software</td>
-                        <td class="align-left">Programación I</td>
-                        <td>12/03/2026</td>
-                        <td class="action-cell">
-                            <button class="icon-btn btn-edit" title="Editar">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"></path></svg>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="align-left">Medina Roselen</td>
-                        <td class="align-left">Tec. Sup. en Desarrollo de Software</td>
-                        <td class="align-left">Base de Datos</td>
-                        <td>15/03/2026</td>
-                        <td class="action-cell">
-                            <button class="icon-btn btn-edit" title="Editar">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"></path></svg>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        @if (Model != null && Model.Any())
+        {
+            <div class="global-table-container" style="margin-top: 15px;">
+                <table class="global-table">
+                    <thead>
+                        <tr>
+                            <th class="align-left" style="border-top: 2px solid var(--primary-color);">ALUMNO</th>
+                            <th class="align-left" style="border-top: 2px solid var(--primary-color);">CARRERA</th>
+                            <th class="align-left" style="border-top: 2px solid var(--primary-color);">MATERIA</th>
+                            <th style="border-top: 2px solid var(--primary-color);">FECHA ALTA</th>
+                            <th style="border-top: 2px solid var(--primary-color);">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ins in Model)
+                        {
+                            <tr>
+                                <td class="align-left">@((ins.Usuarios != null) ? (ins.Usuarios.UsApellido + " " + ins.Usuarios.UsNombre) : "")</td>
+                                <td class="align-left">@((ins.Carreras_Materias != null && ins.Carreras_Materias.Carrera != null) ? ins.Carreras_Materias.Carrera.CaDenominacion : "")</td>
+                                <td class="align-left">@((ins.Carreras_Materias != null && ins.Carreras_Materias.Materia != null) ? ins.Carreras_Materias.Materia.MaDenominacion : "")</td>
+                                <td>@(ins.InFechaAlta.HasValue ? ins.InFechaAlta.Value.ToString("dd/MM/yyyy") : "")</td>
+                                <td class="action-cell">
+                                    <a asp-controller="Inscripciones" asp-action="ModificarInscripcionMateria" asp-route-inid="@ins.InId" class="icon-btn btn-edit" title="Editar">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"></path></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
 
-        <script src="script.js"></script>
+        <script>
+            // Filtrado en cliente para buscar por alumno, carrera o materia
+            (function () {
+                var input = document.getElementById('inputBusqueda');
+                if (!input) return;
+                var timeout = null;
+                input.addEventListener('input', function (e) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(function () {
+                        var q = (e.target.value || '').trim().toLowerCase();
+                        var rows = document.querySelectorAll('.global-table tbody tr');
+                        rows.forEach(function (r) {
+                            // concatenar celdas relevantes: alumno, carrera, materia
+                            var cols = r.querySelectorAll('td');
+                            var text = '';
+                            if (cols && cols.length > 0) {
+                                // usamos las primeras 3 columnas (Alumno, Carrera, Materia)
+                                for (var i = 0; i < Math.min(3, cols.length); i++) {
+                                    text += (cols[i].textContent || '') + ' ';
+                                }
+                            }
+                            text = text.toLowerCase();
+                            if (q === '' || text.indexOf(q) !== -1) {
+                                r.style.display = '';
+                            } else {
+                                r.style.display = 'none';
+                            }
+                        });
+                    }, 120);
+                });
+            })();
+        </script>
 </body>
 </html>
