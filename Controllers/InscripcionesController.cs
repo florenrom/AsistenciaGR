@@ -144,6 +144,16 @@ public class InscripcionesController : Controller
             }
         }
 
+        // Evitar duplicados: si ya existe una inscripción para el mismo alumno y carrera/materia, informar error
+        if (inscripciones.UsId != 0 && inscripciones.CaMaId != 0)
+        {
+            var already = await _context.Inscripciones.AnyAsync(i => i.UsId == inscripciones.UsId && i.CaMaId == inscripciones.CaMaId);
+            if (already)
+            {
+                ModelState.AddModelError(string.Empty, "El estudiante ya está inscripto en la carrera/materia seleccionada.");
+            }
+        }
+
         if (ModelState.IsValid)
         {
             try
