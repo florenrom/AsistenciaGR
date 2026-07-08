@@ -38,6 +38,29 @@
             <div class="form-buttons" style="grid-column: span 2; justify-content: center; margin-top: 15px;">
                 <button type="submit" class="btn-save" id="btnSiguiente" style="width: 100%; padding: 14px;">Configurar Asistencia</button>
             </div>
+            <div class="form-buttons" style="grid-column: span 2; justify-content: center; margin-top: 8px;">
+                <!-- Ir a Asistencia Global: redirige a AsistenciaGlobal con el CaMaId resuelto -->
+                <button type="button" id="btnGlobal" class="btn-save-secondary" style="width:100%; padding:12px;">Ir a Asistencia Global</button>
+            </div>
         </form>
     </div>
 </main>
+
+<script>
+    (function(){
+        document.getElementById('btnGlobal').addEventListener('click', function(){
+            // read selected carrera and materia
+            var ca = document.getElementById('carrera').value;
+            var ma = document.getElementById('materia').value;
+            if(!ca || !ma){
+                alert('Seleccione Carrera y Materia antes de ir a Asistencia Global.');
+                return;
+            }
+            // call server to resolve CaMaId via GET to Index (same logic that Configurar Asistencia uses)
+            // build querystring and redirect to Asistencias/Index which will redirect to AsistenciaGlobal if CaMa found
+            var qs = '?selectedCarreraId=' + encodeURIComponent(ca) + '&selectedMateriaId=' + encodeURIComponent(ma) + '&_global=1';
+            // We redirect to a small helper endpoint that will resolve CaMaId and forward to AsistenciaGlobal
+            window.location.href = '/Asistencias/AsistenciaGlobal' + qs;
+        });
+    })();
+</script>

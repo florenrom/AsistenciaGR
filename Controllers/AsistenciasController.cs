@@ -72,7 +72,12 @@ namespace AsistenciaGR.Controllers
 
                 if (caMa != null)
                 {
-                    // redirect to Asistencia action with the resolved CaMaId
+                    // if query contains _global=1, redirect to AsistenciaGlobal, otherwise to Asistencia
+                    var isGlobal = Request.Query.ContainsKey("_global") && Request.Query["_global"].ToString() == "1";
+                    if (isGlobal)
+                    {
+                        return RedirectToAction(nameof(AsistenciaGlobal), new { CaMaId = caMa.CaMaId });
+                    }
                     return RedirectToAction(nameof(Asistencia), new { CaMaId = caMa.CaMaId });
                 }
 
@@ -177,7 +182,7 @@ namespace AsistenciaGR.Controllers
                     AsPresente = presente,
                     AsJustificacion = row.AsJustificacion,
                     UsId = row.UsId,
-                    AsPorcentaje = porcentaje
+                    CaMaId = model.CaMaId,
                 };
 
                 _context.Asistencias.Add(entity);
@@ -188,8 +193,7 @@ namespace AsistenciaGR.Controllers
         }
 
         // GET: Asistencias/AsistenciaGlobal
-        // Vista estática para asistencia global (diseño)
-
+        // Muestra el histórico de asistencias por materia (filtrado por CaMaId)
         public async Task<IActionResult> AsistenciaGlobal(int? CaMaId)
         {
             var model = new AsistenciaGlobalViewModel();
@@ -210,7 +214,7 @@ namespace AsistenciaGR.Controllers
                 return View(model);
             }
 
-            // Buscar los alumnos inscriptos en esa materia (únicos)
+            // Traer alumnos inscriptos en esa materia
             var estudiantes = await (from i in _context.Inscripciones
                                      join u in _context.Usuarios on i.UsId equals u.UsId
                                      where i.CaMaId == CaMaId && u.RoId == role.RoId
@@ -220,38 +224,45 @@ namespace AsistenciaGR.Controllers
 
             var usIdsInscritos = estudiantes.Select(u => u.UsId).ToList();
 
-            // Paso 2: traer las asistencias de esos alumnos filtradas por la materia
+            // Traer asistencias relacionadas a esta materia y a esos alumnos.
+            // Algunos registros históricos pueden no tener CaMaId (se guardaron antes de asignarlo).
+            // Para mostrar el histórico como primario, incluimos también registros con CaMaId NULL
+            // siempre que pertenezcan a alumnos inscriptos en esta materia.
             var todasLasAsistencias = await _context.Asistencias
-                .Where(a => a.CaMaId == CaMaId && a.UsId.HasValue && usIdsInscritos.Contains(a.UsId.Value))
+                .Where(a => a.UsId.HasValue && usIdsInscritos.Contains(a.UsId.Value)
+                            && (a.CaMaId == CaMaId || a.CaMaId == null))
                 .ToListAsync();
 
+            // Columnas (fechas)
             model.Fechas = todasLasAsistencias
-            .Where(a => a.AsFecha.HasValue)
-            .Select(a => a.AsFecha.Value.Date)
-            .Distinct()
-            .OrderBy(f => f)
-            .ToList();
+                .Where(a => a.AsFecha.HasValue)
+                .Select(a => a.AsFecha.Value.Date)
+                .Distinct()
+                .OrderBy(f => f)
+                .ToList();
 
-            // Armar una fila por alumno
+            // Armar filas por alumno usando AsPorcentaje si existe, sino AsPresente como 100/0
             foreach (var alumno in estudiantes)
             {
                 var asistenciasAlumno = todasLasAsistencias
                     .Where(a => a.UsId == alumno.UsId)
                     .ToList();
 
-                // Para cada fecha buscamos la asistencia correspondiente y usamos AsPorcentaje si está disponible
                 var asistenciaPorFecha = new Dictionary<DateTime, decimal>();
                 decimal sumaPorcentajes = 0m;
                 foreach (var fecha in model.Fechas)
                 {
-                    var registro = asistenciasAlumno
-                        .FirstOrDefault(a => a.AsFecha.HasValue && a.AsFecha.Value.Date == fecha);
+                    var registro = asistenciasAlumno.FirstOrDefault(a => a.AsFecha.HasValue && a.AsFecha.Value.Date == fecha);
                     decimal pct = 0m;
                     if (registro != null)
                     {
-                        if (registro.AsPorcentaje.HasValue)
+                        // Si existe AsPorcentaje en el registro, usarlo; si no, fallback a AsPresente (100/0)
+                        var prop = registro.GetType().GetProperty("AsPorcentaje");
+                        if (prop != null)
                         {
-                            pct = registro.AsPorcentaje.Value;
+                            var val = prop.GetValue(registro);
+                            if (val is decimal d) pct = d;
+                            else if (val is decimal?) pct = ((decimal?)val) ?? 0m;
                         }
                         else
                         {
@@ -281,7 +292,5 @@ namespace AsistenciaGR.Controllers
         {
             return _context.Asistencias.Any(e => e.AsId == id);
         }
-
-        
     }
 }

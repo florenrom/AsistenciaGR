@@ -41,8 +41,5 @@ namespace AsistenciaGR.Models
 
         // Relación opcional hacia Carreras_Materias cuando la asistencia se vincula a una carrera/materia
         public virtual CarreraMateria? CarreraMateria { get; set; }
-
-        // Porcentaje de asistencia calculado según módulos de la materia (0-100)
-        public decimal? AsPorcentaje { get; set; }
     }
 }

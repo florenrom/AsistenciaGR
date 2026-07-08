@@ -75,23 +75,23 @@ public class InscripcionesController : Controller
     public async Task<IActionResult> AgregarInscripcionMateria()
     {
         // find role id for 'Estudiante' (case-insensitive)
-        var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoDenominacion.ToLower() == "estudiante");
+        var rol = await _context.Roles.FirstOrDefaultAsync(r => r.RoDenominacion.ToLower() == "estudiante");
 
-        List<object> students;
-        if (role != null)
+        List<object> estudiantes;
+        if (rol != null)
         {
-            students = await _context.Usuarios
-                .Where(u => u.RoId == role.RoId)
+            estudiantes = await _context.Usuarios
+                .Where(u => u.RoId == rol.RoId)
                 .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
                 .ToListAsync<object>();
         }
         else
         {
             // no role named 'Estudiante' found -> empty list
-            students = new List<object>();
+            estudiantes = new List<object>();
         }
 
-        ViewData["UsId"] = new SelectList(students, "UsId", "FullName");
+        ViewData["UsId"] = new SelectList(estudiantes, "UsId", "FullName");
 
         // populate Carreras and Materias separately for the autocomplete inputs
         var carreras = await _context.Carreras
@@ -111,7 +111,7 @@ public class InscripcionesController : Controller
         ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "Display");
 
         // expose JSON for client-side filtering
-        ViewData["StudentsJson"] = JsonSerializer.Serialize(students);
+        ViewData["StudentsJson"] = JsonSerializer.Serialize(estudiantes);
         ViewData["CarrerasJson"] = JsonSerializer.Serialize(carreras);
         ViewData["MateriasJson"] = JsonSerializer.Serialize(materias);
 
@@ -170,12 +170,12 @@ public class InscripcionesController : Controller
         }
 
         // repopulate selects when returning view on error
-        var students = await _context.Usuarios
+        var estudiantes = await _context.Usuarios
             .Include(u => u.Rol)
             .Where(u => u.Rol != null && u.Rol.RoDenominacion == "Estudiante")
             .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
             .ToListAsync();
-        ViewData["UsId"] = new SelectList(students, "UsId", "FullName", inscripciones.UsId);
+        ViewData["UsId"] = new SelectList(estudiantes, "UsId", "FullName", inscripciones.UsId);
 
         var cam = await _context.CarrerasMaterias
             .Include(cm => cm.Carrera)
@@ -185,12 +185,12 @@ public class InscripcionesController : Controller
         ViewData["CaMaId"] = new SelectList(cam, "CaMaId", "Display", inscripciones.CaMaId);
 
         // also repopulate JSON lists required by the autocomplete view
-        var studentsJsonList = await _context.Usuarios
+        var estudiantesJsonList = await _context.Usuarios
             .Include(u => u.Rol)
             .Where(u => u.Rol != null && u.Rol.RoDenominacion == "Estudiante")
             .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
             .ToListAsync();
-        ViewData["StudentsJson"] = JsonSerializer.Serialize(studentsJsonList);
+        ViewData["StudentsJson"] = JsonSerializer.Serialize(estudiantesJsonList);
 
         var carrerasJsonList = await _context.Carreras
             .Select(c => new { c.CaId, c.CaDenominacion })
@@ -232,12 +232,12 @@ public class InscripcionesController : Controller
         }
 
         // populate selects for edit view
-        var students = await _context.Usuarios
+        var estudiantes = await _context.Usuarios
             .Include(u => u.Rol)
             .Where(u => u.Rol != null && u.Rol.RoDenominacion == "Estudiante")
             .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
             .ToListAsync();
-        ViewData["UsId"] = new SelectList(students, "UsId", "FullName", inscripciones.UsId);
+        ViewData["UsId"] = new SelectList(estudiantes, "UsId", "FullName", inscripciones.UsId);
 
         var cam = await _context.CarrerasMaterias
             .Include(cm => cm.Carrera)
@@ -282,12 +282,12 @@ public class InscripcionesController : Controller
             return RedirectToAction(nameof(GestionInscripcionesMaterias));
         }
         // repopulate selects when returning view on error
-        var students = await _context.Usuarios
+        var estudiantes = await _context.Usuarios
             .Include(u => u.Rol)
             .Where(u => u.Rol != null && u.Rol.RoDenominacion == "Estudiante")
             .Select(u => new { u.UsId, FullName = ((u.UsApellido ?? "") + " " + (u.UsNombre ?? "")).Trim() })
             .ToListAsync();
-        ViewData["UsId"] = new SelectList(students, "UsId", "FullName", inscripciones.UsId);
+        ViewData["UsId"] = new SelectList(estudiantes, "UsId", "FullName", inscripciones.UsId);
 
         var cam = await _context.CarrerasMaterias
             .Include(cm => cm.Carrera)
