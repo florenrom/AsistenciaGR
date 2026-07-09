@@ -60,7 +60,7 @@
             // build querystring and redirect to Asistencias/Index which will redirect to AsistenciaGlobal if CaMa found
             var qs = '?selectedCarreraId=' + encodeURIComponent(ca) + '&selectedMateriaId=' + encodeURIComponent(ma) + '&_global=1';
             // We redirect to a small helper endpoint that will resolve CaMaId and forward to AsistenciaGlobal
-            window.location.href = '/Asistencias/AsistenciaGlobal' + qs;
+            window.location.href = '/Asistencias/Index' + qs;
         });
     })();
 </script>
